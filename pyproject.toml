@@ -1,16 +1,16 @@
 [project]
 name = "luxtelligence-lnoi400-forge"
-version = "0.7.1"
+version = "0.8.0"
 authors = [{name = "Flexcompute Inc.", email = "info@flexcompute.com"}]
 description = ""
 readme = "README.md"
-dependencies = ["photonforge >= 0.7.0"]
+dependencies = ["photonforge >= 0.8.0"]
 
 [project.optional-dependencies]
 dev = ["pytest >= 7.2", "ipykernel >= 6.10", "ipywidgets >= 8.0"]
 
 [tool.setuptools]
-packages = ["luxtelligence-lnoi400-forge"]
+packages = ["luxtelligence_lnoi400_forge"]
 
 [tool.black]
 line-length = 100
