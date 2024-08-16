@@ -266,7 +266,7 @@ def u_turn_bend(
     radius = abs(v_offset) / 2
     a0, a1 = (-90, 90) if v_offset > 0 else (90, -90)
     for layer, path in port_spec.get_paths((0, 0)):
-        path.arc(radius, a0, a1, euler_fraction=euler_fraction, endpoint=endpoint)
+        path.arc(a0, a1, radius, euler_fraction=euler_fraction, endpoint=endpoint)
         c.add(layer, path)
 
     c.add_port(_pf.Port((0, 0), 0, port_spec))
@@ -315,7 +315,7 @@ def u_bend_racetrack(
     radius = abs(v_offset) / 2
     a0, a1 = (-90, 90) if v_offset > 0 else (90, -90)
     for layer, path in port_spec.get_paths((0, 0)):
-        path.arc(radius, a0, a1, euler_fraction=euler_fraction, endpoint=endpoint)
+        path.arc(a0, a1, radius, euler_fraction=euler_fraction, endpoint=endpoint)
         c.add(layer, path)
 
     c.add_port(_pf.Port((0, 0), 0, port_spec))
@@ -366,7 +366,7 @@ def l_turn_bend(
 
     endpoint = (effective_radius, effective_radius)
     for layer, path in port_spec.get_paths((0, 0)):
-        path.arc(effective_radius, -90, 0, euler_fraction=euler_fraction, endpoint=endpoint)
+        path.arc(-90, 0, effective_radius, euler_fraction=euler_fraction, endpoint=endpoint)
         c.add(layer, path)
 
     c.add_port(_pf.Port((0, 0), 0, port_spec))
@@ -602,7 +602,9 @@ def eo_phase_shifter(
             port_spec=tl_port_spec, length=modulation_length, technology=technology
         )
         r = c.add_reference(tl)
-        c.add_port((r["P0"], r["P1"]))
+        tl.remove_port("P0")
+        tl.remove_port("P1")
+        # c.add_port((r["P0"], r["P1"]))
 
     c.add_model(_pf.CircuitModel(**circuit_model_kwargs), "Circuit")
     return c
