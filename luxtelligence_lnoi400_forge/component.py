@@ -45,6 +45,13 @@ def mmi1x2(
 
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
 
@@ -125,6 +132,13 @@ def mmi2x2(
 
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
 
@@ -206,6 +220,13 @@ def s_bend_vert(
 
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
 
@@ -257,6 +278,13 @@ def u_turn_bend(
     """
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
 
@@ -306,6 +334,13 @@ def u_bend_racetrack(
     """
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
 
@@ -359,6 +394,13 @@ def l_turn_bend(
 
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
 
@@ -415,6 +457,13 @@ def double_linear_inverse_taper(
     """
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(start_port_spec, str):
         start_port_spec = technology.ports[start_port_spec]
     if isinstance(end_port_spec, str):
@@ -480,6 +529,13 @@ def cpw_probe_pad_linear(
     """
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
 
@@ -569,6 +625,13 @@ def eo_phase_shifter(
 
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
     if isinstance(port_spec, str):
         port_spec = technology.ports[port_spec]
     if isinstance(tl_port_spec, str):
@@ -666,6 +729,13 @@ def mz_modulator_unbalanced(
 
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
 
     if isinstance(tl_port_spec, str):
         tl_port_spec = technology.ports[tl_port_spec]
@@ -824,6 +894,13 @@ def chip_frame(
     """
     if technology is None:
         technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
 
     if x_size < 10000:
         x_size = 5050
