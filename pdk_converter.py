@@ -88,6 +88,11 @@ descriptions = {
     (21, 1): "Metal heaters",
     (6, 0): "Usable floorplan area",
     (6, 1): "Final chip boundaries",
+    (201, 0): "Labels for GDS layout (not fabricated)",
+}
+
+names = {
+    (31, 0): "ALIGN",
 }
 
 tree = et.parse(f"{pdk}/lnoi.lyp")
@@ -95,17 +100,28 @@ root = tree.getroot()
 
 print("    layers = {")
 for prop in root.findall("properties"):
-    name = prop.find("name").text
-    if name is None:
-        continue
-    name = name.strip()
     text = prop.find("source").text
+    if text == "*/*":
+        continue
     j = text.find("/")
     k = j + text[j:].find("@")
     layer = (int(text[:j]), int(text[j + 1 : k]))
     color = prop.find("fill-color").text + "18"
     pattern = patterns[prop.find("dither-pattern").text[1:]]
     desc = descriptions[layer]
+
+    name = prop.find("name").text
+    if name is None:
+        name = names[layer]
+    else:
+        name = name.strip()
+    if name == "LN_STRIP":
+        name = "LN_RIDGE"
+    elif name == "LN_RIB":
+        name = "LN_SLAB"
+    elif name == "RIB_NEGATIVE":
+        name = "SLAB_NEGATIVE"
+
     print(
         f"""        {name!r}: pf.LayerSpec(
             layer={layer},

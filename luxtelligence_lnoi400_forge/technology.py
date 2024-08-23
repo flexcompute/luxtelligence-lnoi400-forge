@@ -11,7 +11,7 @@ def lnoi400(
     *,
     ln_thickness: float = 0.4,
     slab_thickness: float = 0.2,
-    sidewall_angle: float = 13,  # TODO: Double check this
+    sidewall_angle: float = 13,
     box_thickness: float = 4.7,
     tl_thickness: float = 0.9,
     tl_separation: float = 1,
@@ -25,13 +25,13 @@ def lnoi400(
 ) -> pf.Technology:
     # Layers
     layers = {
-        "LN_STRIP": pf.LayerSpec(
+        "LN_RIDGE": pf.LayerSpec(
             layer=(2, 0), description="LN etch (ridge)", color="#7d57de18", pattern="//"
         ),
-        "LN_RIB": pf.LayerSpec(
+        "LN_SLAB": pf.LayerSpec(
             layer=(3, 0), description="LN etch (full)", color="#00008018", pattern="\\"
         ),
-        "RIB_NEGATIVE": pf.LayerSpec(
+        "SLAB_NEGATIVE": pf.LayerSpec(
             layer=(3, 1), description="Slab etch negative", color="#6750bf18", pattern="\\"
         ),
         "LABELS": pf.LayerSpec(
@@ -50,7 +50,7 @@ def lnoi400(
             layer=(21, 1), description="Metal heaters", color="#3503fc18", pattern="."
         ),
         "ALIGN": pf.LayerSpec(
-            layer=(31, 0), description="Alignment markers (LN etch)", color="#5179b518", pattern="/"
+            layer=(31, 0), description="Alignment markers (LN etch)", color="#ba29c218", pattern="/"
         ),
         "DOC": pf.LayerSpec(
             layer=(201, 0),
