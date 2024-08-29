@@ -92,7 +92,7 @@ def lnoi400(
     ports = {
         "RWG1000": pf.PortSpec(
             description="LN single mode ridge waveguide for C-band, TE mode",
-            width=6,
+            width=5,
             limits=rwg_port_limits,
             num_modes=2,
             target_neff=2.2,

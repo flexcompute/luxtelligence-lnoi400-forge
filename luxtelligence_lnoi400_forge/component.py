@@ -481,11 +481,11 @@ def double_linear_inverse_taper(
 
     length = lower_taper_length + upper_taper_length
     c.add(
-        "LN_STRIP",
+        "LN_RIDGE",
         _pf.stencil.linear_taper(
             upper_taper_length, (upper_taper_start_width, upper_taper_end_width)
         ).translate((lower_taper_length, 0)),
-        "LN_RIB",
+        "LN_SLAB",
         _pf.stencil.linear_taper(length, (lower_taper_start_width, lower_taper_end_width)),
     )
 
