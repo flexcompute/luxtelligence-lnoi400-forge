@@ -11,7 +11,8 @@ technology specification for
 
 Installation via `pip`:
 
-    pip install --user luxtelligence_lnoi400_forge-0.9.0-py3-none-any.whl
+    pip install luxtelligence_lnoi400_forge-*-py3-none-any.whl
+
 
 ### PhotonForge Web UI
 
@@ -41,6 +42,7 @@ components can be discovered by:
     dir(lxt.component)
     
     pdk_component = lxt.component.mmi1x2()
+
 
 Utility functions `cpw_spec` and `place_edge_couplers` are also available for
 generating CPW port specifications and placing edge couplers at chip boudaries.
