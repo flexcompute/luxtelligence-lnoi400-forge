@@ -23,6 +23,29 @@ def lnoi400(
     tl_metal: _Medium = td.material_library["Au"]["JohnsonChristy1972"],
     opening: _Medium = td.Medium(permittivity=1.0, name="Opening"),
 ) -> pf.Technology:
+    """Create a technology for the LNOI400 PDK.
+
+    Args:
+        ln_thickness (float): LiNbO₃ layer thickness.
+        slab_thickness (float): Partially etched slab thickness in LiNbO₃.
+        sidewall_angle (float): Sidewall angle (in degrees) for LiNbO₃
+          etching.
+        box_thickness (float): Thickness of the bottom oxide clad.
+        tl_thickness (float): TL layer thickness.
+        tl_separation (float): Separation between the LiNbO₃ and TL layers.
+        include_substrate (bool): Flag indicating whether or not to include
+          the silicon substrate.
+        include_top_opening (bool): Flag indicating whether or not to
+          include the open region above the last extrusion layer.
+        sio2 (Medium): Oxide and background medium.
+        si (Medium): Silicon medium.
+        ln (Medium): LiNbO₃ medium.
+        tl_metal (Medium): TL metal medium.
+        opening (Medium): Medium for openings.
+
+    Returns:
+        Technology: E-Beam PDK technology definition.
+    """
     # Layers
     layers = {
         "LN_RIDGE": pf.LayerSpec(
