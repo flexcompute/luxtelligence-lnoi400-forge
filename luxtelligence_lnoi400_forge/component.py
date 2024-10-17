@@ -176,7 +176,13 @@ def mmi2x2(
     c.add_port(_pf.Port((x, -offset), 180, port_spec, inverted=True))
     c.add_port(_pf.Port((x, offset), 180, port_spec, inverted=True))
 
-    model_kwargs = {"port_symmetries": [("P1", "P2", {"P0": "P0", "P2": "P1"})]}
+    model_kwargs = {
+        "port_symmetries": [
+            ("P0", "P1", {"P1": "P0", "P2": "P3", "P3": "P2"}),
+            ("P0", "P2", {"P1": "P3", "P2": "P0", "P3": "P1"}),
+            ("P0", "P3", {"P1": "P2", "P2": "P1", "P3": "P0"}),
+        ]
+    }
     model_kwargs.update(tidy3d_model_kwargs)
     c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
     return c
