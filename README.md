@@ -1,24 +1,15 @@
 # Luxtelligence LNOI400
 
-This python module implements the Luxtelligence LNOI400 PDK as components and
-technology specification for
+This python module implements the [Luxtelligence](https://luxtelligence.ai/)
+LNOI400 PDK as components and technology specification for
 [PhotonForge](https://docs.flexcompute.com/projects/photonforge/)
 
 
 ## Installation
 
-### Python interface
-
 Installation via `pip`:
 
     pip install luxtelligence_lnoi400_forge-*-py3-none-any.whl
-
-
-### PhotonForge Web UI
-
-In the Tidy3D web interface, go to your [*Account
-Center*](https://tidy3d.simulation.cloud/account) and upload the token file
-(.tok) under *PhotonForge Libraries* to enable this module.
 
 
 ## Usage

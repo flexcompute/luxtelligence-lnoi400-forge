@@ -99,7 +99,7 @@ def place_edge_couplers(
     coupler: pf.Component = None,
     slab_removal_width: float = 20.0,
     straight_length: float = 10.0,
-    side_spec: typing.Literal[*_sides] = "N",
+    side_spec: typing.Literal[_sides] = "N",
     offset: float = 60.0,
     number: int = 1,
     pitch: float = 127.0,
