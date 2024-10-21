@@ -9,7 +9,7 @@ LNOI400 PDK as components and technology specification for
 
 Installation via `pip`:
 
-    pip install luxtelligence_lnoi400_forge-*-py3-none-any.whl
+    pip install luxtelligence-lnoi400-forge
 
 
 ## Usage
