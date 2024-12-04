@@ -5,6 +5,7 @@ import luxtelligence_lnoi400_forge as lxt
 
 def test_version():
     assert isinstance(lxt.__version__, str)
+    assert lxt.__version__ == lxt.lnoi400().version
     pyproject = pathlib.Path("pyproject.toml")
     if pyproject.is_file():
         contents = pyproject.read_text()

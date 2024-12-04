@@ -87,9 +87,7 @@ def mmi1x2(
     c.add_port(_pf.Port((x, -offset), 180, port_spec, inverted=True))
     c.add_port(_pf.Port((x, offset), 180, port_spec, inverted=True))
 
-    model_kwargs = {"port_symmetries": [("P1", "P2", {"P0": "P0", "P2": "P1"})]}
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
     return c
 
 
@@ -176,15 +174,7 @@ def mmi2x2(
     c.add_port(_pf.Port((x, -offset), 180, port_spec, inverted=True))
     c.add_port(_pf.Port((x, offset), 180, port_spec, inverted=True))
 
-    model_kwargs = {
-        "port_symmetries": [
-            ("P0", "P1", {"P1": "P0", "P2": "P3", "P3": "P2"}),
-            ("P0", "P2", {"P1": "P3", "P2": "P0", "P3": "P1"}),
-            ("P0", "P3", {"P1": "P2", "P2": "P1", "P3": "P0"}),
-        ]
-    }
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
     return c
 
 
@@ -250,9 +240,7 @@ def s_bend_vert(
     c.add_port(_pf.Port((0, 0), 0, port_spec))
     c.add_port(_pf.Port((h_extent + 2 * dx_straight, v_offset), 180, port_spec, inverted=True))
 
-    model_kwargs = {"port_symmetries": [("P0", "P1", {"P1": "P0"})]}
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
     return c
 
 
@@ -306,9 +294,7 @@ def u_turn_bend(
     c.add_port(_pf.Port((0, 0), 0, port_spec))
     c.add_port(_pf.Port(endpoint, 0, port_spec, inverted=True))
 
-    model_kwargs = {"port_symmetries": [("P0", "P1", {"P1": "P0"})]}
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
     return c
 
 
@@ -362,9 +348,7 @@ def u_bend_racetrack(
     c.add_port(_pf.Port((0, 0), 0, port_spec))
     c.add_port(_pf.Port(endpoint, 0, port_spec, inverted=True))
 
-    model_kwargs = {"port_symmetries": [("P0", "P1", {"P1": "P0"})]}
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
     return c
 
 
@@ -426,6 +410,161 @@ def l_turn_bend(
     return c
 
 
+@_pf.parametric_component(name_prefix="SBEND_VAR_WIDTH")
+def s_bend_var_width(
+    *,
+    port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
+    h_extent: float = 58.0,
+    v_offset: float = 14.5,
+    start_section_width: _typ.Optional[float] = 0.8,
+    technology: _pf.Technology = None,
+    name: str = "",
+    tidy3d_model_kwargs: dict = {},
+) -> _pf.Component:
+    """S-bend waveguide section with varying profile width.
+
+    Args:
+        port_spec: Port specification describing waveguide cross-section.
+        h_extent: The horizontal extent of the bend.
+        v_offset: The vertical offset of the bend.
+        start_section_width: If not `None`, width of the core at the start
+          of the S bend (linearly tapered along bend).
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
+        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
+          component's :class:`photonforge.Tidy3DModel`.
+
+    Returns:
+        Component with the S-bend, ports and model.
+    """
+    if technology is None:
+        technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
+    if isinstance(port_spec, str):
+        port_spec = technology.ports[port_spec]
+
+    c = _pf.Component(name, technology=technology)
+
+    core_width, _, core_layer = min(p for p in port_spec.path_profiles if p[1] == 0)
+    dw = start_section_width - core_width
+
+    start_port_spec = port_spec.copy()
+    start_port_spec.description = f"{port_spec.description}, custom core {start_section_width}μm"
+    path_profiles = []
+
+    for width, offset, layer in port_spec.path_profiles:
+        start_width = (width + dw) if offset == 0 else width
+        path_profiles.append((start_width, offset, layer))
+
+        path = _pf.Path((0, 0), width=start_width, offset=offset)
+        path.segment(
+            (h_extent, 0),
+            width=width,
+            offset=(
+                f"{offset} + {v_offset} * u^3 * (6 * u^2 - 15 * u + 10)",
+                f"{v_offset} * (3 * u^2 * (6 * u^2 - 15 * u + 10) + u^3 * (12 * u - 15))",
+            ),
+        )
+        c.add(layer, path)
+
+    start_port_spec.path_profiles = path_profiles
+
+    c.add_port(_pf.Port((0, 0), 0, start_port_spec))
+    c.add_port(_pf.Port((h_extent, v_offset), 180, port_spec, inverted=True))
+
+    model_kwargs = {}
+    model_kwargs.update(tidy3d_model_kwargs)
+    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    return c
+
+
+@_pf.parametric_component(name_prefix="DIR_COUPL")
+def dir_coupl(
+    *,
+    port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
+    io_wg_sep: float = 30.6,
+    s_bend_length: float = 58.0,
+    central_straight_length: float = 16.92,
+    central_wg_width: float = 0.8,
+    coupl_wg_sep: float = 0.8,
+    technology: _pf.Technology = None,
+    name: str = "",
+    tidy3d_model_kwargs: dict = {},
+) -> _pf.Component:
+    """Directional coupler with S bends.
+
+    Args:
+        port_spec: Port specification describing waveguide cross-section.
+        io_wg_sep: Separation between the input/output waveguide centers.
+        s_bend_length: Length of the S bend sections.
+        central_straight_length: Length of the coupling region.
+        central_wg_width: Width of the waveguide in the coupling region.
+        coupl_wg_sep: Distance between the waveguides (edge-to-edge) in the
+          coupling region.
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
+        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
+          component's :class:`photonforge.Tidy3DModel`.
+
+    Returns:
+        Component with the directional coupler, ports and model.
+    """
+    if technology is None:
+        technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
+    if isinstance(port_spec, str):
+        port_spec = technology.ports[port_spec]
+
+    s_bend = s_bend_var_width(
+        port_spec=port_spec,
+        h_extent=s_bend_length,
+        v_offset=0.5 * (io_wg_sep - coupl_wg_sep - central_wg_width),
+        start_section_width=central_wg_width,
+        technology=technology,
+    )
+    straight = _pf.parametric.straight(
+        port_spec=s_bend.ports["P0"].spec, length=central_straight_length, technology=technology
+    )
+
+    c = _pf.Component(name, technology=technology)
+    top = _pf.Reference(
+        straight, (-0.5 * central_straight_length, 0.5 * (central_wg_width + coupl_wg_sep))
+    )
+    bot = _pf.Reference(
+        straight, (-0.5 * central_straight_length, -0.5 * (central_wg_width + coupl_wg_sep))
+    )
+    c.add(top, bot)
+
+    ref = c.add_reference(s_bend).connect("P0", bot["P0"])
+    c.add_port(ref["P1"])
+
+    ref = c.add_reference(s_bend).mirror().connect("P0", top["P0"])
+    c.add_port(ref["P1"])
+
+    ref = c.add_reference(s_bend).mirror().connect("P0", bot["P1"])
+    c.add_port(ref["P1"])
+
+    ref = c.add_reference(s_bend).connect("P0", top["P1"])
+    c.add_port(ref["P1"])
+
+    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    return c
+
+
 @_pf.parametric_component(name_prefix="EDGE_COUPLER_LIN_LIN")
 def double_linear_inverse_taper(
     *,
@@ -435,6 +574,8 @@ def double_linear_inverse_taper(
     lower_taper_length: float = 120.0,
     upper_taper_start_width: float = 0.25,
     upper_taper_length: float = 240.0,
+    slab_removal_width: float = 20.0,
+    input_ext: float = 0.0,
     technology: _pf.Technology = None,
     name: str = "",
     tidy3d_model_kwargs: dict = {},
@@ -452,6 +593,10 @@ def double_linear_inverse_taper(
         upper_taper_start_width: The start width of the rib waveguide
           section.
         upper_taper_length: Length of the rib waveguide taper.
+        slab_removal_width: Width of the region where the slab is removed
+          close to the coupler (for fabrication in positive tone).
+        input_ext: Length of a straight segment extending beyond the lower
+          taper.
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
@@ -474,6 +619,10 @@ def double_linear_inverse_taper(
         start_port_spec = technology.ports[start_port_spec]
     if isinstance(end_port_spec, str):
         end_port_spec = technology.ports[end_port_spec]
+    if input_ext < 0:
+        raise ValueError("'input_ext' may not be negative.")
+    if slab_removal_width < 0:
+        raise ValueError("'slab_removal_width' may not be negative.")
 
     c = _pf.Component(name, technology=technology)
 
@@ -495,7 +644,25 @@ def double_linear_inverse_taper(
         _pf.stencil.linear_taper(length, (lower_taper_start_width, lower_taper_end_width)),
     )
 
-    c.add_port(_pf.Port((0, 0), 0, start_port_spec))
+    if input_ext > 0:
+        c.add(
+            "LN_SLAB",
+            _pf.Rectangle(
+                corner1=(-input_ext, -0.5 * lower_taper_start_width),
+                corner2=(0, 0.5 * lower_taper_start_width),
+            ),
+        )
+
+    if slab_removal_width > 0:
+        c.add(
+            "SLAB_NEGATIVE",
+            _pf.Rectangle(
+                center=(0.5 * (lower_taper_length + upper_taper_length - input_ext), 0),
+                size=(lower_taper_length + upper_taper_length + input_ext, slab_removal_width),
+            ),
+        )
+
+    c.add_port(_pf.Port((-input_ext if input_ext > 0 else 0, 0), 0, start_port_spec))
     c.add_port(_pf.Port((length, 0), 180, end_port_spec, inverted=True))
 
     c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
@@ -688,7 +855,7 @@ def mz_modulator_unbalanced(
     rib_core_width_modulator: float = 2.5,
     modulation_length: float = 7500.0,
     length_imbalance: float = 100.0,
-    bias_tuning_section_length: float = 750.0,
+    bias_tuning_section_length: float = 700.0,
     rf_pad_start_width: float = 80.0,
     rf_pad_length_straight: float = 10.0,
     rf_pad_length_tapered: float = 190.0,
@@ -881,6 +1048,8 @@ def chip_frame(
     *,
     x_size: _typ.Literal[5000, 5050, 10000, 10100, 20000, 20200] = 10100,
     y_size: _typ.Literal[5000, 5050, 10000, 10100, 20000, 20200] = 5050,
+    center: _typ.Sequence[float] = (0, 0),
+    exclusion_zone_width: float = 50,
     name: str = "",
     technology: _pf.Technology = None,
 ) -> _pf.Component:
@@ -894,6 +1063,12 @@ def chip_frame(
     Args:
         x_size: Chip dimension in the horizontal direction.
         y_size: Chip dimension in the vertical direction.
+        center: Center of the chip frame rectangle.
+        exclusion_zone_width: Width of the exclusion zone close to the chip
+          edges.
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
 
     Returns:
         Component with chip frame.
@@ -925,14 +1100,203 @@ def chip_frame(
     if x_size == 5050 and y_size == 5050:
         raise ValueError("The minimal die size is 5050 μm × 10100 μm.")
 
+    ez = 2 * exclusion_zone_width
+
     return _pf.Component(name, technology=technology).add(
-        (6, 1),
-        _pf.Rectangle((0, 0), (x_size, y_size)),
-        (6, 0),
-        _pf.Rectangle((50, 50), (x_size - 50, y_size - 50)),
+        "CHIP_EXCLUSION_ZONE",
+        _pf.Rectangle(center=center, size=(x_size, y_size)),
+        "CHIP_CONTOUR",
+        _pf.Rectangle(center=center, size=(x_size - ez, y_size - ez)),
         # (201, 0),
         # _pf.Rectangle((0, 0), (75, 75)),
         # _pf.Rectangle((x_size - 75, 0), (x_size, 75)),
         # _pf.Rectangle((0, y_size - 75), (75, y_size)),
         # _pf.Rectangle((x_size - 75, y_size - 75), (x_size, y_size)),
     )
+
+
+@_pf.parametric_component(name_prefix="HEATER_PAD")
+def heater_pad(
+    *,
+    pad_size: _typ.Sequence[float] = (100.0, 100.0),
+    taper_length: float = 10.0,
+    contact_width: float = 2.7,
+    technology: _pf.Technology = None,
+    name: str = "",
+) -> _pf.Component:
+    """Bonding pad for a heater.
+
+    Args:
+        pad_size: Size of the bonding pad.
+        taper_length: Length of the wedge connecting the pad to the heater.
+        contact_width: Width of the connection to the heater.
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
+        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
+          component's :class:`photonforge.Tidy3DModel`.
+
+    Returns:
+        Component with the bonding pad centered at the origin.
+    """
+    if technology is None:
+        technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
+
+    c = _pf.Component(name, technology=technology)
+
+    x0 = 0.5 * pad_size[0]
+    y0 = 0.5 * pad_size[1]
+    y1 = 0.5 * (
+        contact_width
+        + (pad_size[1] - contact_width) * taper_length / (0.5 * pad_size[0] + taper_length)
+    )
+    x2 = x0 + taper_length
+    y2 = 0.5 * contact_width
+    polygon = _pf.Polygon(
+        [(x0, y0), (-x0, y0), (-x0, -y0), (x0, -y0), (x0, -y1), (x2, -y2), (x2, y2), (x0, y1)]
+    )
+    c.add("HT", polygon)
+
+    return c
+
+
+@_pf.parametric_component(name_prefix="HEATER_STRAIGHT")
+def heater_straight(
+    *,
+    heater_length: float = 150.0,
+    heater_width: float = 1.0,
+    pad_size: _typ.Sequence[float] = (100.0, 100.0),
+    taper_length: float = 10.0,
+    technology: _pf.Technology = None,
+    name: str = "",
+) -> _pf.Component:
+    """Bonding pad for a heater.
+
+    Args:
+        heater_length: Heater wire length.
+        heater_width: Heater wire width.
+        pad_size: Size of the heater bonding pad.
+        taper_length: Length of the wedge connecting the pad to the heater.
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
+
+    Returns:
+        Component with heater and bonding pads.
+    """
+    if technology is None:
+        technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
+
+    contact_width = 3 * heater_width
+
+    overlap = pad_size[1] - heater_length + contact_width
+    if overlap >= 0:
+        _warn.warn(
+            f"Heater bonding pads are touching. Increase 'heater_length' or decrease 'pad_size[1]' "
+            f"by more than {overlap:g} μm to avoid this issue.",
+            RuntimeWarning,
+            1,
+        )
+
+    c = _pf.Component(name, technology=technology)
+
+    pad = heater_pad(
+        pad_size=pad_size,
+        taper_length=taper_length,
+        contact_width=contact_width,
+        technology=technology,
+    )
+
+    y_pad = 0.5 * heater_width + taper_length + 0.5 * pad_size[0]
+    c.add(
+        "HT",
+        _pf.Path((0, 0), heater_width).segment((heater_length, 0)),
+        _pf.Reference(pad, origin=(0.5 * contact_width, y_pad), rotation=-90),
+        _pf.Reference(pad, origin=(heater_length - 0.5 * contact_width, y_pad), rotation=-90),
+    )
+
+    return c
+
+
+@_pf.parametric_component(name_prefix="HEATED_SWG")
+def heated_straight_waveguide(
+    *,
+    port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
+    wg_length: float = 700.0,
+    heater_width: float = 1.0,
+    heater_offset: float = 1.22,
+    pad_size: _typ.Sequence[float] = (100.0, 100.0),
+    taper_length: float = 10.0,
+    draw_heater: bool = True,
+    technology: _pf.Technology = None,
+    name: str = "",
+    tidy3d_model_kwargs: dict = {},
+) -> _pf.Component:
+    """Straight heated waveguide section.
+
+    Args:
+        port_spec: Port specification describing waveguide cross-section.
+        wg_length: Waveguide length.
+        heater_width: Heater wire width.
+        heater_offset: Offset between the heater wire and waveguide centers.
+        pad_size: Size of the heater bonding pad.
+        taper_length: Length of the wedge connecting the pad to the heater.
+        draw_heater: Flag indicating whether to include the heater or not.
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
+        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
+          component's :class:`photonforge.Tidy3DModel`.
+
+    Returns:
+        Component with the waveguide, heater, ports and model.
+    """
+    if technology is None:
+        technology = _pf.config.default_technology
+        if "LNOI400" not in technology.name:
+            _warn.warn(
+                f"Current default technology {technology.name} does not seem supported by the "
+                "Luxtelligence LNOI400 component library.",
+                RuntimeWarning,
+                1,
+            )
+    if isinstance(port_spec, str):
+        port_spec = technology.ports[port_spec]
+
+    c = _pf.Component(name, technology=technology)
+
+    straight = c.add_reference(
+        _pf.parametric.straight(port_spec=port_spec, length=wg_length, technology=technology)
+    )
+
+    if draw_heater:
+        heater = heater_straight(
+            heater_length=wg_length,
+            heater_width=heater_width,
+            pad_size=pad_size,
+            taper_length=taper_length,
+            technology=technology,
+        )
+        c.add(_pf.Reference(heater, (0, heater_offset)))
+
+    c.add_port(straight["P0"])
+    c.add_port(straight["P1"])
+
+    model_kwargs = {"port_symmetries": [("P0", "P1", {"P1": "P0"})]}
+    model_kwargs.update(tidy3d_model_kwargs)
+    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    return c

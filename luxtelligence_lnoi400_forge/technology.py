@@ -40,7 +40,7 @@ def lnoi400(
         sio2 (Medium): Oxide and background medium.
         si (Medium): Silicon medium.
         ln (Medium): LiNbO₃ medium.
-        tl_metal (Medium): TL metal medium.
+        tl_metal (Medium): TL and heater metal medium.
         opening (Medium): Medium for openings.
 
     Returns:
@@ -70,7 +70,7 @@ def lnoi400(
             layer=(21, 0), description="Metal transmission lines", color="#3503fc18", pattern="\\"
         ),
         "HT": pf.LayerSpec(
-            layer=(21, 1), description="Metal heaters", color="#3503fc18", pattern="."
+            layer=(21, 1), description="Metal heaters", color="#a3c50318", pattern="."
         ),
         "ALIGN": pf.LayerSpec(
             layer=(31, 0), description="Alignment markers (LN etch)", color="#ba29c218", pattern="/"
@@ -141,4 +141,4 @@ def lnoi400(
         "UniCPW-EO": cpw_spec(10, 4, 180),
     }
 
-    return pf.Technology("LNOI400", "1.0", layers, extrusion_specs, ports, sio2)
+    return pf.Technology("LNOI400", "1.1.0", layers, extrusion_specs, ports, sio2)
