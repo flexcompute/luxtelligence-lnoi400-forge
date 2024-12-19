@@ -7,6 +7,7 @@ import photonforge as pf
 _Medium = td.components.medium.MediumType
 
 
+@pf.parametric_technology
 def lnoi400(
     *,
     ln_thickness: float = 0.4,
@@ -17,10 +18,30 @@ def lnoi400(
     tl_separation: float = 1,
     include_substrate: bool = False,
     include_top_opening: bool = False,
-    sio2: _Medium = td.material_library["SiO2"]["Palik_Lossless"],
-    si: _Medium = td.material_library["cSi"]["Li1993_293K"],
-    ln: _Medium = td.material_library["LiNbO3"]["Zelmon1997"](optical_axis=1),
-    tl_metal: _Medium = td.material_library["Au"]["JohnsonChristy1972"],
+    sio2: dict[str, _Medium] = {
+        "optical": td.material_library["SiO2"]["Palik_Lossless"],
+        "electrical": td.Medium(permittivity=4.2, name="SiO2"),
+    },
+    si: dict[str, _Medium] = {
+        "optical": td.material_library["cSi"]["Li1993_293K"],
+        "electrical": td.Medium(permittivity=12.3, name="Si"),
+    },
+    ln: dict[str, _Medium] = {
+        "optical": td.material_library["LiNbO3"]["Zelmon1997"](optical_axis=1),
+        "electrical": td.AnisotropicMedium(
+            xx=td.Medium(permittivity=85.2),
+            yy=td.Medium(permittivity=28.7),
+            zz=td.Medium(permittivity=85.2),
+        ),
+    },
+    tl_metal: dict[str, _Medium] = {
+        "optical": td.material_library["Au"]["JohnsonChristy1972"],
+        "electrical": td.LossyMetalMedium(
+            conductivity=41,
+            frequency_range=[0.1e9, 200e9],
+            fit_param=td.SkinDepthFitterParam(max_num_poles=16),
+        ),
+    },
     opening: _Medium = td.Medium(permittivity=1.0, name="Opening"),
 ) -> pf.Technology:
     """Create a technology for the LNOI400 PDK.
@@ -137,8 +158,8 @@ def lnoi400(
             target_neff=2.2,
             path_profiles=((0.25, 0, (3, 0)), (12, 0, (3, 1))),
         ),
-        "UniCPW": cpw_spec(),
-        "UniCPW-EO": cpw_spec(10, 4, 180),
+        "UniCPW": cpw_spec(z_center=z_tl + 0.5 * tl_thickness),
+        "UniCPW-EO": cpw_spec(10, 4, 180, z_center=z_tl + 0.5 * tl_thickness),
     }
 
-    return pf.Technology("LNOI400", "1.1.1", layers, extrusion_specs, ports, sio2)
+    return pf.Technology("LNOI400", "1.2.dev0", layers, extrusion_specs, ports, sio2)

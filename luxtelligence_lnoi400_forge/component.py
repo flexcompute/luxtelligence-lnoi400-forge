@@ -754,6 +754,18 @@ def cpw_probe_pad_linear(
     )
 
     c.add_port(_pf.Port((length, 0), 180, port_spec, inverted=True))
+
+    x_term = 0.5 * length_straight
+    y_term = 0.5 * (scaling * y_gnd + y_max)
+    sig_size = (length_straight, 2 * scaling * y_sig)
+    gnd_size = (length_straight, y_max - scaling * y_gnd)
+    c.add_terminal(
+        {
+            "G0": _pf.Terminal(layer, _pf.Rectangle(center=(x_term, -y_term), size=gnd_size)),
+            "S": _pf.Terminal(layer, _pf.Rectangle(center=(x_term, 0), size=sig_size)),
+            "G1": _pf.Terminal(layer, _pf.Rectangle(center=(x_term, y_term), size=gnd_size)),
+        }
+    )
     return c
 
 
@@ -840,9 +852,7 @@ def eo_phase_shifter(
             port_spec=tl_port_spec, length=modulation_length, technology=technology
         )
         r = c.add_reference(tl)
-        tl.remove_port("P0")
-        tl.remove_port("P1")
-        # c.add_port((r["P0"], r["P1"]))
+        c.add_port({"E0": r["E0"], "E1": r["E1"]})
 
     c.add_model(_pf.CircuitModel(**circuit_model_kwargs), "Circuit")
     return c
@@ -1038,8 +1048,18 @@ def mz_modulator_unbalanced(
             port_spec=tl_port_spec, length=modulation_length, technology=technology
         )
         tl_ref = c.add_reference(tl)
-        c.add_reference(pad).connect("P0", tl_ref["P0"])
-        c.add_reference(pad).connect("P0", tl_ref["P1"])
+        pad0 = c.add_reference(pad).connect("E0", tl_ref["E0"])
+        pad1 = c.add_reference(pad).mirror().connect("E0", tl_ref["E1"])
+        c.add_terminal(
+            {
+                "G0_in": pad0["G0"],
+                "S_in": pad0["S"],
+                "G1_in": pad0["G1"],
+                "G0_out": pad1["G0"],
+                "S_out": pad1["S"],
+                "G1_out": pad1["G1"],
+            }
+        )
 
     c.add_model(_pf.CircuitModel(**circuit_model_kwargs), "Circuit")
     return c
@@ -1164,7 +1184,14 @@ def heater_pad(
     polygon = _pf.Polygon(
         [(x0, y0), (-x0, y0), (-x0, -y0), (x0, -y0), (x0, -y1), (x2, -y2), (x2, y2), (x0, y1)]
     )
-    c.add("HT", polygon)
+    layer = technology.layers["HT"].layer
+    c.add(layer, polygon)
+    c.add_terminal(
+        [
+            _pf.Terminal(layer, _pf.Rectangle(size=pad_size)),
+            _pf.Terminal(layer, _pf.Rectangle(center=(x2, 0), size=(0, contact_width))),
+        ]
+    )
 
     return c
 
@@ -1230,6 +1257,7 @@ def heater_straight(
         _pf.Reference(pad, origin=(0.5 * contact_width, y_pad), rotation=-90),
         _pf.Reference(pad, origin=(heater_length - 0.5 * contact_width, y_pad), rotation=-90),
     )
+    c.add_terminal(c.query(None, "T0"))
 
     return c
 
@@ -1293,10 +1321,12 @@ def heated_straight_waveguide(
             taper_length=taper_length,
             technology=technology,
         )
-        c.add(_pf.Reference(heater, (0, heater_offset)))
+        heater_ref = _pf.Reference(heater, (0, heater_offset))
+        c.add(heater_ref)
+        c.add_terminal((heater_ref["T0"], heater_ref["T1"]))
 
-    c.add_port(straight["P0"])
-    c.add_port(straight["P1"])
+    c.add_port(straight["P0"], "P0")
+    c.add_port(straight["P1"], "P1")
 
     model_kwargs = {"port_symmetries": [("P0", "P1", {"P1": "P0"})]}
     model_kwargs.update(tidy3d_model_kwargs)

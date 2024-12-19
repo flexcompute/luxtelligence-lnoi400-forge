@@ -6,9 +6,13 @@ import typing
 
 
 def _cpw_info(port_spec):
+    path_profiles = port_spec.path_profiles
+    if isinstance(path_profiles, dict):
+        path_profiles = list(path_profiles.values())
+
     ground_profile = None
     central_profile = None
-    for profile in port_spec.path_profiles:
+    for profile in path_profiles:
         if profile[1] == 0:
             central_profile = profile
         elif profile[1] > 0:
@@ -19,7 +23,7 @@ def _cpw_info(port_spec):
         or ground_profile is None
         or central_profile[2] != ground_profile[2]
         or not port_spec.symmetric()
-        or len(port_spec.path_profiles) != 3
+        or len(path_profiles) != 3
     ):
         raise RuntimeError(
             "Port specification does not correspond to an expected CPW transmission line."
@@ -41,6 +45,7 @@ def cpw_spec(
     limits=None,
     num_modes=1,
     target_neff=2.2,
+    z_center=1.85,
 ):
     """Template to quickly generate a coplanar transmission line PortSpec.
 
@@ -66,7 +71,7 @@ def cpw_spec(
         description = f"Coplanar RF transmission line (width: {central_width}, gap: {gap})"
 
     if width is None:
-        width = min(5 * main_width, 0.95 * full_width)
+        width = min(3 * main_width, 0.95 * full_width)
     elif width >= full_width:
         warnings.warn(
             "CPW width is larger than the ground conductor extension. Please increase "
@@ -74,8 +79,11 @@ def cpw_spec(
         )
 
     if limits is None:
-        h = 1.6 * main_width
+        h = 1.2 * main_width
         limits = (-h, h)
+
+    x_gap = 0.5 * (central_width + gap)
+    override_size = (gap, 2 * gap)
 
     return pf.PortSpec(
         description=description,
@@ -83,11 +91,16 @@ def cpw_spec(
         limits=limits,
         num_modes=1,
         target_neff=2.2,
-        path_profiles=(
-            (central_width, 0, (21, 0)),
-            (ground_width, offset, (21, 0)),
-            (ground_width, -offset, (21, 0)),
-        ),
+        path_profiles={
+            "G0": (ground_width, -offset, (21, 0)),
+            "S": (central_width, 0, (21, 0)),
+            "G1": (ground_width, offset, (21, 0)),
+        },
+        override_structures=[
+            (pf.Rectangle(center=(x_gap, z_center), size=override_size), gap / 5),
+            (pf.Rectangle(center=(-x_gap, z_center), size=override_size), gap / 5),
+        ],
+        voltage_path=[(central_width / 2 + gap, z_center), (central_width / 2, z_center)],
     )
 
 
