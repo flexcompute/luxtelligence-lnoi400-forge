@@ -141,4 +141,4 @@ def lnoi400(
         "UniCPW-EO": cpw_spec(10, 4, 180),
     }
 
-    return pf.Technology("LNOI400", "1.1.0", layers, extrusion_specs, ports, sio2)
+    return pf.Technology("LNOI400", "1.1.1", layers, extrusion_specs, ports, sio2)

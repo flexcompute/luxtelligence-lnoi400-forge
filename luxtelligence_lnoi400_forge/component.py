@@ -193,10 +193,10 @@ def s_bend_vert(
 
     Args:
         port_spec: Port specification describing waveguide cross-section.
+        h_extent: Horizontal extent of the bend.
+        v_offset: Vertical offset of the bend.
         dx_straight: Horizontal extent of the straight segments at the bend
           input and output.
-        v_offset: The vertical offset of the bend.
-        h_extent: The horizontal extent of the bend.
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
@@ -258,7 +258,7 @@ def u_turn_bend(
 
     Args:
         port_spec: Port specification describing waveguide cross-section.
-        v_offset: The vertical offset of the bend.
+        v_offset: Vertical offset of the bend.
         euler_fraction: Fraction of the bend that is created using an Euler
           spiral (see :func:`photonforge.Path.arc`).
         technology: Component technology. If ``None``, the default
@@ -416,7 +416,7 @@ def s_bend_var_width(
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
     h_extent: float = 58.0,
     v_offset: float = 14.5,
-    start_section_width: _typ.Optional[float] = 0.8,
+    start_section_width: float = 0.8,
     technology: _pf.Technology = None,
     name: str = "",
     tidy3d_model_kwargs: dict = {},
@@ -425,10 +425,10 @@ def s_bend_var_width(
 
     Args:
         port_spec: Port specification describing waveguide cross-section.
-        h_extent: The horizontal extent of the bend.
-        v_offset: The vertical offset of the bend.
-        start_section_width: If not `None`, width of the core at the start
-          of the S bend (linearly tapered along bend).
+        h_extent: Horizontal extent of the bend.
+        v_offset: Vertical offset of the bend.
+        start_section_width: Width of the core at the start of the S bend
+          (linearly tapered along bend).
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
@@ -680,9 +680,10 @@ def cpw_probe_pad_linear(
     name: str = "",
     tidy3d_model_kwargs: dict = {},
 ) -> _pf.Component:
-    """Dual layer inverse taper designed for matching with a lensed fiber.
+    """RF access line for high-frequency GSG probes.
 
-    The taper transitions from a wire to a rib waveguide.
+    The probe pad maintains a fixed gap/center conductor ratio across its
+    length, to achieve a good impedance matching.
 
     Args:
         port_spec: Port specification describing the transmission line
@@ -769,9 +770,10 @@ def eo_phase_shifter(
     name: str = "",
     circuit_model_kwargs: dict = {},
 ) -> _pf.Component:
-    """Dual layer inverse taper designed for matching with a lensed fiber.
+    """Phase modulator based on the Pockels effect.
 
-    The taper transitions from a wire to a rib waveguide.
+    The modulator waveguide is located within the upper gap of an RF
+    coplanar waveguide.
 
     Args:
         port_spec: Port specification for the optical waveguide.
@@ -1050,8 +1052,8 @@ def chip_frame(
     y_size: _typ.Literal[5000, 5050, 10000, 10100, 20000, 20200] = 5050,
     center: _typ.Sequence[float] = (0, 0),
     exclusion_zone_width: float = 50,
-    name: str = "",
     technology: _pf.Technology = None,
+    name: str = "",
 ) -> _pf.Component:
     """Chip extent and exclusion zone.
 
