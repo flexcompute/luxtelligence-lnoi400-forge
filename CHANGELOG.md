@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1 - 2024-12-19
+
+### Fixed
+- Docstrings from a few components have been fixed.
+
+
 ## 1.1.0 - 2024-12-03
 
 ### Added
