@@ -1,5 +1,3 @@
-from .utils import cpw_spec
-
 import tidy3d as td
 import photonforge as pf
 
@@ -12,7 +10,7 @@ def lnoi400(
     *,
     ln_thickness: float = 0.4,
     slab_thickness: float = 0.2,
-    sidewall_angle: float = 13,
+    sidewall_angle: float = 13.5,
     box_thickness: float = 4.7,
     tl_thickness: float = 0.9,
     tl_separation: float = 1,
@@ -20,25 +18,25 @@ def lnoi400(
     include_top_opening: bool = False,
     sio2: dict[str, _Medium] = {
         "optical": td.material_library["SiO2"]["Palik_Lossless"],
-        "electrical": td.Medium(permittivity=4.2, name="SiO2"),
+        "electrical": td.Medium(permittivity=3.9, name="SiO2"),
     },
     si: dict[str, _Medium] = {
         "optical": td.material_library["cSi"]["Li1993_293K"],
-        "electrical": td.Medium(permittivity=12.3, name="Si"),
+        "electrical": td.Medium(permittivity=11.7, name="Si"),
     },
     ln: dict[str, _Medium] = {
         "optical": td.material_library["LiNbO3"]["Zelmon1997"](optical_axis=1),
         "electrical": td.AnisotropicMedium(
-            xx=td.Medium(permittivity=85.2),
-            yy=td.Medium(permittivity=28.7),
-            zz=td.Medium(permittivity=85.2),
+            xx=td.Medium(permittivity=44),
+            yy=td.Medium(permittivity=27.9),
+            zz=td.Medium(permittivity=44),
         ),
     },
     tl_metal: dict[str, _Medium] = {
         "optical": td.material_library["Au"]["JohnsonChristy1972"],
         "electrical": td.LossyMetalMedium(
             conductivity=41,
-            frequency_range=[0.1e9, 200e9],
+            frequency_range=[0.1e9, 100e9],
             fit_param=td.SkinDepthFitterParam(max_num_poles=16),
         ),
     },
@@ -115,6 +113,7 @@ def lnoi400(
     z_top = z_tl + tl_thickness
 
     extrusion_specs = [
+        pf.ExtrusionSpec(bounds, sio2, (-box_thickness, 0)),
         pf.ExtrusionSpec(bounds, ln, (0, slab_thickness), 0),
         pf.ExtrusionSpec(full_ln_mask, ln, (0, ln_thickness), sidewall_angle),
         pf.ExtrusionSpec(slab_etch_mask, sio2, (0, ln_thickness), -sidewall_angle),
