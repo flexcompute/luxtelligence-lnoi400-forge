@@ -86,10 +86,10 @@ def lnoi400(
             layer=(6, 1), description="Final chip boundaries", color="#00fe9c18", pattern="/"
         ),
         "TL": pf.LayerSpec(
-            layer=(21, 0), description="Metal transmission lines", color="#3503fc18", pattern="\\"
+            layer=(21, 0), description="Metal transmission lines", color="#eadb0718", pattern="\\"
         ),
         "HT": pf.LayerSpec(
-            layer=(21, 1), description="Metal heaters", color="#a3c50318", pattern="."
+            layer=(21, 1), description="Metal heaters", color="#f0b90518", pattern="."
         ),
         "ALIGN": pf.LayerSpec(
             layer=(31, 0), description="Alignment markers (LN etch)", color="#ba29c218", pattern="/"
@@ -113,7 +113,6 @@ def lnoi400(
     z_top = z_tl + tl_thickness
 
     extrusion_specs = [
-        pf.ExtrusionSpec(bounds, sio2, (-box_thickness, 0)),
         pf.ExtrusionSpec(bounds, ln, (0, slab_thickness), 0),
         pf.ExtrusionSpec(full_ln_mask, ln, (0, ln_thickness), sidewall_angle),
         pf.ExtrusionSpec(slab_etch_mask, sio2, (0, ln_thickness), -sidewall_angle),
@@ -132,7 +131,8 @@ def lnoi400(
     swg_port_gap = min(2.1, box_thickness)
     swg_port_limits = (-swg_port_gap, slab_thickness + swg_port_gap)
 
-    ports = {
+    technology = pf.Technology("LNOI400", "1.2.0dev", layers, extrusion_specs, {}, sio2)
+    technology.ports = {
         "RWG1000": pf.PortSpec(
             description="LN single mode ridge waveguide for C-band, TE mode",
             width=5,
@@ -157,8 +157,12 @@ def lnoi400(
             target_neff=2.2,
             path_profiles=((0.25, 0, (3, 0)), (12, 0, (3, 1))),
         ),
-        "UniCPW": cpw_spec(z_center=z_tl + 0.5 * tl_thickness),
-        "UniCPW-EO": cpw_spec(10, 4, 180, z_center=z_tl + 0.5 * tl_thickness),
+        "UniCPW": pf.cpw_spec(
+            (21, 0), 15, 5, 250, added_solver_modes=0, target_neff=2.2, technology=technology
+        ),
+        "UniCPW-EO": pf.cpw_spec(
+            (21, 0), 10, 4, 180, added_solver_modes=0, target_neff=2.2, technology=technology
+        ),
     }
 
-    return pf.Technology("LNOI400", "1.2.dev0", layers, extrusion_specs, ports, sio2)
+    return technology

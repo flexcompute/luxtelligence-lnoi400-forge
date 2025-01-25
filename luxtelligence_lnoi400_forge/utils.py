@@ -1,7 +1,6 @@
 import photonforge as pf
 import numpy
 
-import warnings
 import typing
 
 
@@ -34,74 +33,6 @@ def _cpw_info(port_spec):
     gap = ground_offset - 0.5 * (ground_width + central_width)
 
     return central_width, gap, ground_width, ground_offset, layer
-
-
-def cpw_spec(
-    central_width=15,
-    gap=5,
-    ground_width=250,
-    description=None,
-    width=None,
-    limits=None,
-    num_modes=1,
-    target_neff=2.2,
-    z_center=1.85,
-):
-    """Template to quickly generate a coplanar transmission line PortSpec.
-
-    Args:
-        central_width: Width of the central conductor.
-        gap: Distance between the central conductor and the grounds.
-        ground_width: Width of the ground conductors.
-        description: Description used in ``PortSpec.description``.
-        width: Dimension used in ``PortSpec.width``. If not set, a default
-          of '5 * (central_width + 2 * gap)' is used.
-        limits: Vertical port limits used in ``PortSpec.limits``.
-        num_modes: Value used for ``PortSpec.num_modes``.
-        target_neff: Value used for ``PortSpec.target_neff``.
-
-    Returns:
-        PortSpec for the CPW transmission line.
-    """
-    main_width = central_width + 2 * gap
-    full_width = main_width + 2 * ground_width
-    offset = 0.5 * (main_width + ground_width)
-
-    if description is None:
-        description = f"Coplanar RF transmission line (width: {central_width}, gap: {gap})"
-
-    if width is None:
-        width = min(3 * main_width, 0.95 * full_width)
-    elif width >= full_width:
-        warnings.warn(
-            "CPW width is larger than the ground conductor extension. Please increase "
-            "'ground_width' or decrease 'width'."
-        )
-
-    if limits is None:
-        h = 1.2 * main_width
-        limits = (-h, h)
-
-    x_gap = 0.5 * (central_width + gap)
-    override_size = (gap, 2 * gap)
-
-    return pf.PortSpec(
-        description=description,
-        width=width,
-        limits=limits,
-        num_modes=1,
-        target_neff=2.2,
-        path_profiles={
-            "G0": (ground_width, -offset, (21, 0)),
-            "S": (central_width, 0, (21, 0)),
-            "G1": (ground_width, offset, (21, 0)),
-        },
-        override_structures=[
-            (pf.Rectangle(center=(x_gap, z_center), size=override_size), gap / 5),
-            (pf.Rectangle(center=(-x_gap, z_center), size=override_size), gap / 5),
-        ],
-        voltage_path=[(central_width / 2 + gap, z_center), (central_width / 2, z_center)],
-    )
 
 
 _sides = ["N", "NORTH", "W", "WEST", "E", "EAST", "S", "SOUTH"]
