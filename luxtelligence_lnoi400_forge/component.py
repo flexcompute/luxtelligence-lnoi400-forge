@@ -1251,13 +1251,12 @@ def heater_straight(
     )
 
     y_pad = 0.5 * heater_width + taper_length + 0.5 * pad_size[0]
-    c.add(
-        "HT",
-        _pf.Path((0, 0), heater_width).segment((heater_length, 0)),
-        _pf.Reference(pad, origin=(0.5 * contact_width, y_pad), rotation=-90),
-        _pf.Reference(pad, origin=(heater_length - 0.5 * contact_width, y_pad), rotation=-90),
-    )
-    c.add_terminal(c.query(None, "T0"))
+    pad0 = _pf.Reference(pad, origin=(0.5 * contact_width, y_pad), rotation=-90)
+    pad1 = _pf.Reference(pad, origin=(heater_length - 0.5 * contact_width, y_pad), rotation=-90)
+
+    c.add("HT", _pf.Path((0, 0), heater_width).segment((heater_length, 0)), pad0, pad1)
+
+    c.add_terminal([pad0["T0"], pad1["T0"]])
 
     return c
 
