@@ -37,7 +37,7 @@ def lnoi400(
         "electrical": td.LossyMetalMedium(
             conductivity=41,
             frequency_range=[0.1e9, 100e9],
-            fit_param=td.SkinDepthFitterParam(max_num_poles=16),
+            fit_param=td.SurfaceImpedanceFitterParam(max_num_poles=16),
         ),
     },
     opening: _Medium = td.Medium(permittivity=1.0, name="Opening"),
