@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.0 - Unreleased
+## 1.2.0 - 2025-03-04
 
 ### Added
 - Electrical ports and terminals.
