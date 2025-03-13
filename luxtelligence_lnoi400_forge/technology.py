@@ -131,7 +131,7 @@ def lnoi400(
     swg_port_gap = min(2.1, box_thickness)
     swg_port_limits = (-swg_port_gap, slab_thickness + swg_port_gap)
 
-    technology = pf.Technology("LNOI400", "1.2.0", layers, extrusion_specs, {}, sio2)
+    technology = pf.Technology("LNOI400", "1.2.1", layers, extrusion_specs, {}, sio2)
     technology.ports = {
         "RWG1000": pf.PortSpec(
             description="LN single mode ridge waveguide for C-band, TE mode",
