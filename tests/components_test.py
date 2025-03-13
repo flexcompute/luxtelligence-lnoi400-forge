@@ -13,9 +13,7 @@ def test_components():
 
 def test_defaults(request):
     pf.config.default_technology = lxt.lnoi400()
-    for component in [
-        getattr(lxt.component, n)() for n in dir(lxt.component) if not n.startswith("_")
-    ]:
+    for component in [getattr(lxt.component, n)() for n in lxt.component_names]:
         name = component.name
         if name == "UBEND_RACETRACK":
             name = "UBEND"

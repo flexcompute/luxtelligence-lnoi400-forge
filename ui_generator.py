@@ -167,6 +167,17 @@ for comp_name in component_names:
     )
 
 
+def complex_json(obj):
+    if isinstance(obj, tuple):
+        return tuple(complex_json(x) for x in obj)
+    if isinstance(obj, list):
+        return [complex_json(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: complex_json(v) for k, v in sorted(obj.items())}
+    if isinstance(obj, complex):
+        return {"real": obj.real, "imag": obj.imag}
+    return obj
+
 def make_tech_arg(name, value, tooltip):
     arg = {
         "defaults": value,
@@ -195,13 +206,10 @@ def make_tech_arg(name, value, tooltip):
         else:
             arg["defaults"] = {
                 "type": "constructor",
-                "value": {n: d[n] for n in ("type",) + tuple(value.__fields_set__)},
+                "value": complex_json(
+                    {n: d[n] for n in ("type",) + tuple(value.__fields_set__)}
+                ),
             }
-            if "poles" in arg["defaults"]["value"]:
-                arg["defaults"]["value"]["poles"] = tuple(
-                    ({"real": a.real, "imag": a.imag}, {"real": b.real, "imag": b.imag})
-                    for a, b in arg["defaults"]["value"]["poles"]
-                )
     elif isinstance(value, dict) and all(
         isinstance(v, lxt.technology._Medium) for v in value.values()
     ):
@@ -219,13 +227,10 @@ def make_tech_arg(name, value, tooltip):
             else:
                 child["defaults"] = {
                     "type": "constructor",
-                    "value": {n: d[n] for n in ("type",) + tuple(v.__fields_set__)},
+                    "value": complex_json(
+                        {n: d[n] for n in ("type",) + tuple(v.__fields_set__)}
+                    ),
                 }
-                if "poles" in child["defaults"]["value"]:
-                    child["defaults"]["value"]["poles"] = tuple(
-                        ({"real": a.real, "imag": a.imag}, {"real": b.real, "imag": b.imag})
-                        for a, b in child["defaults"]["value"]["poles"]
-                    )
             children.append(child)
         arg = {
             "itemSpan": 24,
