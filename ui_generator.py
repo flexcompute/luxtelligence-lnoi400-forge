@@ -160,7 +160,7 @@ for comp_name in component_names:
     components.append(
         {
             "arguments": args,
-            "function": component_func.__name__,
+            "function": "component." + component_func.__name__,
             "label": make_label(comp_name),
             "svg": svg,
         }
@@ -177,6 +177,7 @@ def complex_json(obj):
     if isinstance(obj, complex):
         return {"real": obj.real, "imag": obj.imag}
     return obj
+
 
 def make_tech_arg(name, value, tooltip):
     arg = {
@@ -206,9 +207,7 @@ def make_tech_arg(name, value, tooltip):
         else:
             arg["defaults"] = {
                 "type": "constructor",
-                "value": complex_json(
-                    {n: d[n] for n in ("type",) + tuple(value.__fields_set__)}
-                ),
+                "value": complex_json({n: d[n] for n in ("type",) + tuple(value.__fields_set__)}),
             }
     elif isinstance(value, dict) and all(
         isinstance(v, lxt.technology._Medium) for v in value.values()
@@ -227,9 +226,7 @@ def make_tech_arg(name, value, tooltip):
             else:
                 child["defaults"] = {
                     "type": "constructor",
-                    "value": complex_json(
-                        {n: d[n] for n in ("type",) + tuple(v.__fields_set__)}
-                    ),
+                    "value": complex_json({n: d[n] for n in ("type",) + tuple(v.__fields_set__)}),
                 }
             children.append(child)
         arg = {

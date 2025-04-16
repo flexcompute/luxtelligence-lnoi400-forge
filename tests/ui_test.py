@@ -21,8 +21,10 @@ def test_ui_components():
     assert len(_ui_.json["components"]) == len(lxt.component_names)
     for func in _ui_.json["components"]:
         print(func["function"])
-        assert hasattr(lxt.component, func["function"])
-        pars = inspect.signature(getattr(lxt.component, func["function"])).parameters
+        assert func["function"].startswith("component.")
+        fname = func["function"][10:]
+        assert hasattr(lxt.component, fname)
+        pars = inspect.signature(getattr(lxt.component, fname)).parameters
         pars = {k: v for k, v in pars.items() if not k.endswith("_kwargs")}
         assert len(pars) == len(func["arguments"])
         for arg in func["arguments"]:
