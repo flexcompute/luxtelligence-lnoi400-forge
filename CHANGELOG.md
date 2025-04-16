@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.2 - 2025-04-16
+
+### Fixed
+- Dynamic UI information
+
+
+## 1.2.1 - 2025-03-13
+
+### Fixed
+- Dynamic UI information
+
+
 ## 1.2.0 - 2025-03-04
 
 ### Added
