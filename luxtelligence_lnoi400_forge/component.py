@@ -1,4 +1,4 @@
-from .utils import _cpw_info
+from .utils import _core_and_clad_info, _cpw_info
 
 import photonforge as _pf
 
@@ -57,8 +57,7 @@ def mmi1x2(
 
     c = _pf.Component(name, technology=technology)
 
-    core_width, _, core_layer = min(p for p in port_spec.path_profiles if p[1] == 0)
-    clad_width, _, clad_layer = max(p for p in port_spec.path_profiles if p[1] == 0)
+    core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
     margin = 0.5 * (clad_width - core_width)
 
     c.add(
@@ -142,8 +141,7 @@ def mmi2x2(
 
     c = _pf.Component(name, technology=technology)
 
-    core_width, _, core_layer = min(p for p in port_spec.path_profiles if p[1] == 0)
-    clad_width, _, clad_layer = max(p for p in port_spec.path_profiles if p[1] == 0)
+    core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
     margin = 0.5 * (clad_width - core_width)
 
     c.add(
@@ -452,14 +450,15 @@ def s_bend_var_width(
 
     c = _pf.Component(name, technology=technology)
 
-    core_width, _, core_layer = min(p for p in port_spec.path_profiles if p[1] == 0)
+    core_width, core_layer, *_ = _core_and_clad_info(port_spec)
     dw = start_section_width - core_width
 
-    start_port_spec = port_spec.copy()
-    start_port_spec.description = f"{port_spec.description}, custom core {start_section_width}μm"
-    path_profiles = []
+    original_profiles = port_spec.path_profiles
+    if isinstance(original_profiles, dict):
+        original_profiles = original_profiles.values()
 
-    for width, offset, layer in port_spec.path_profiles:
+    path_profiles = []
+    for width, offset, layer in original_profiles:
         start_width = (width + dw) if offset == 0 else width
         path_profiles.append((start_width, offset, layer))
 
@@ -474,6 +473,8 @@ def s_bend_var_width(
         )
         c.add(layer, path)
 
+    start_port_spec = port_spec.copy()
+    start_port_spec.description = f"{port_spec.description}, custom core {start_section_width}μm"
     start_port_spec.path_profiles = path_profiles
 
     c.add_port(_pf.Port((0, 0), 0, start_port_spec))
@@ -626,8 +627,8 @@ def double_linear_inverse_taper(
 
     c = _pf.Component(name, technology=technology)
 
-    lower_taper_start_width = min(p[0] for p in start_port_spec.path_profiles if p[1] == 0)
-    upper_taper_end_width = min(p[0] for p in end_port_spec.path_profiles if p[1] == 0)
+    lower_taper_start_width, *_ = _core_and_clad_info(start_port_spec)
+    upper_taper_end_width, *_ = _core_and_clad_info(end_port_spec)
 
     slope = (lower_taper_end_width - lower_taper_start_width) / lower_taper_length
     lower_taper_end_width = lower_taper_start_width + slope * (
@@ -824,10 +825,13 @@ def eo_phase_shifter(
     if isinstance(tl_port_spec, str):
         tl_port_spec = technology.ports[tl_port_spec]
 
-    core_width, _, _ = min(port_spec.path_profiles)
+    core_width, *_ = _core_and_clad_info(port_spec)
     added_width = rib_core_width_modulator - core_width
     mod_spec = port_spec.copy()
-    mod_spec.path_profiles = {(w + added_width, g, a) for w, g, a in port_spec.path_profiles}
+    path_profiles = port_spec.path_profiles
+    if isinstance(path_profiles, dict):
+        path_profiles = path_profiles.values()
+    mod_spec.path_profiles = {(w + added_width, g, a) for w, g, a in path_profiles}
 
     taper = _pf.parametric.transition(
         port_spec1=port_spec, port_spec2=mod_spec, length=taper_length, technology=technology
@@ -1256,7 +1260,7 @@ def heater_straight(
 
     c.add("HT", _pf.Path((0, 0), heater_width).segment((heater_length, 0)), pad0, pad1)
 
-    c.add_terminal([pad0["T0"], pad1["T0"]])
+    c.add_terminal([pad0["T0"], pad1["T1"]])
 
     return c
 

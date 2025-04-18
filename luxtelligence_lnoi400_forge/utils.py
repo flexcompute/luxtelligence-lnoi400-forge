@@ -4,6 +4,50 @@ import numpy
 import typing
 
 
+def _core_and_clad_info(port_spec: pf.PortSpec):
+    ridge = port_spec.path_profile_for((2, 0))
+    slab = port_spec.path_profile_for((3, 0))
+    empty = port_spec.path_profile_for((3, 1))
+    if empty is None:
+        if ridge is None or slab is None:
+            raise RuntimeError(
+                "Port specification profile is unexpected for an optical waveguide in the LNOI400 "
+                "platform."
+            )
+        core = ridge
+        core_layer = (2, 0)
+        clad = slab
+        clad_layer = (3, 0)
+    else:
+        if ridge is None and slab is None:
+            raise RuntimeError(
+                "Port specification profile is unexpected for an optical waveguide in the LNOI400 "
+                "platform."
+            )
+        elif ridge is None:
+            core = slab
+            core_layer = (3, 0)
+        else:
+            core = ridge
+            core_layer = (2, 0)
+        clad = empty
+        clad_layer = (3, 1)
+
+    core_width = (
+        max(x[0] + 2 * abs(x[1]) for x in zip(*core))
+        if isinstance(core[0], (list, tuple))
+        else core[0] + 2 * abs(core[1])
+    )
+
+    clad_width = (
+        max(x[0] + 2 * abs(x[1]) for x in zip(*clad))
+        if isinstance(clad[0], (list, tuple))
+        else clad[0] + 2 * abs(clad[1])
+    )
+
+    return (core_width, core_layer, clad_width, clad_layer)
+
+
 def _cpw_info(port_spec):
     path_profiles = port_spec.path_profiles
     if isinstance(path_profiles, dict):
