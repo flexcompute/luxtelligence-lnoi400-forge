@@ -1,9 +1,9 @@
 # Changelog
 
-## 1.2.3 - 2025-04-18
+## 1.2.4 - 2025-04-18
 
-### Fixed
-- Dynamic UI information
+### Changed
+- Better error detection when inspecting port specifications
 
 
 ## 1.2.2 - 2025-04-16
