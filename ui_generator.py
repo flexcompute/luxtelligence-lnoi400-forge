@@ -43,7 +43,7 @@ pf.config.svg_port_names = False
 pf.config.default_technology = lxt.lnoi400()
 
 
-def make_component_arg(name, value, tooltip):
+def make_component_arg(comp_name, name, value, tooltip):
     arg = {
         "defaults": value,
         "label": make_label(name),
@@ -83,10 +83,41 @@ def make_component_arg(name, value, tooltip):
             assert 0 <= value <= 1
             arg["validatesArgs"] = {"min": [0], "max": [1]}
         else:
-            assert 0 <= value
+            assert value >= 0
+            no_validation = {
+                ("s_bend_vert", "v_offset"),
+                ("s_bend_var_width", "v_offset"),
+                ("heated_straight_waveguide", "heater_offset"),
+            }
             arg["suffix"] = "μm"
-            arg["validates"] = ["min"]
-            arg["validatesArgs"] = {"min": [0]}
+            if (comp_name, name) not in no_validation:
+                zero_valid = {
+                    ("s_bend_vert", "dx_straight"),
+                    ("dir_coupl", "io_wg_sep"),
+                    ("dir_coupl", "central_straight_length"),
+                    ("dir_coupl", "coupl_wg_sep"),
+                    ("double_linear_inverse_taper", "upper_taper_start_width"),
+                    ("double_linear_inverse_taper", "slab_removal_width"),
+                    ("cpw_probe_pad_linear", "pad_width"),
+                    ("cpw_probe_pad_linear", "length_straight"),
+                    ("mz_modulator_unbalanced", "length_imbalance"),
+                    ("mz_modulator_unbalanced", "bias_tuning_section_length"),
+                    ("mz_modulator_unbalanced", "rf_pad_start_width"),
+                    ("mz_modulator_unbalanced", "rf_pad_length_straight"),
+                    ("chip_frame", "exclusion_zone_width"),
+                    ("heater_pad", "taper_length"),
+                    ("heater_pad", "contact_width"),
+                    ("heater_straight", "heater_length"),
+                    ("heater_straight", "heater_width"),
+                    ("heater_straight", "taper_length"),
+                    ("heated_straight_waveguide", "heater_width"),
+                    ("heated_straight_waveguide", "taper_length"),
+                }
+                validate = (
+                    "min" if value == 0 or (comp_name, name) in zero_valid else "exclusiveMin"
+                )
+                arg["validates"] = [validate]
+                arg["validatesArgs"] = {validate: [0]}
     elif (
         isinstance(value, tuple)
         and len(value) == 2
@@ -146,13 +177,17 @@ for comp_name in component_names:
         if go_args:
             if len(line.strip()) == 0:
                 if not name.endswith("_kwargs"):
-                    args.append(make_component_arg(name, parameters[name].default, tooltip))
+                    args.append(
+                        make_component_arg(comp_name, name, parameters[name].default, tooltip)
+                    )
                 break
             if line.startswith("      "):
                 tooltip += " " + line.strip()
             else:
                 if name and not name.endswith("_kwargs"):
-                    args.append(make_component_arg(name, parameters[name].default, tooltip))
+                    args.append(
+                        make_component_arg(comp_name, name, parameters[name].default, tooltip)
+                    )
                 name = line[4 : 4 + line[4:].find(":")]
                 tooltip = line[line.find(":") + 2 :]
         else:
@@ -192,13 +227,13 @@ def make_tech_arg(name, value, tooltip):
         arg["type"] = "number"
         if "angle" in name:
             arg["suffix"] = "°"
-            arg["validates"] = ["min", "max"]
-            arg["validatesArgs"] = {"min": [-90], "max": [90]}
+            arg["validates"] = ["exclusiveMin", "exclusiveMax"]
+            arg["validatesArgs"] = {"exclusiveMin": [-90], "exclusiveMax": [90]}
         else:
             arg["suffix"] = "μm"
             if any(w in name for w in ("thickness", "depth", "separation", "gap")):
-                arg["validates"] = ["min"]
-                arg["validatesArgs"] = {"min": [0]}
+                arg["validates"] = ["exclusiveMin"]
+                arg["validatesArgs"] = {"exclusiveMin": [0]}
     elif isinstance(value, lxt.technology._Medium):
         arg["type"] = "medium"
         d = value.dict()
