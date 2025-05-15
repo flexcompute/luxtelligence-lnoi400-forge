@@ -81,6 +81,7 @@ def make_component_arg(comp_name, name, value, tooltip):
             arg["validatesArgs"] = {"min": [-90], "max": [90]}
         elif any(w in name for w in ("ratio", "fraction")):
             assert 0 <= value <= 1
+            arg["validates"] = ["min", "max"]
             arg["validatesArgs"] = {"min": [0], "max": [1]}
         else:
             assert value >= 0
