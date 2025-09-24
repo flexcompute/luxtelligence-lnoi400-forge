@@ -56,6 +56,7 @@ def mmi1x2(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "mmi"
 
     core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
     margin = 0.5 * (clad_width - core_width)
@@ -140,6 +141,7 @@ def mmi2x2(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "mmi"
 
     core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
     margin = 0.5 * (clad_width - core_width)
@@ -225,6 +227,8 @@ def s_bend_vert(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "bend"
+
     for layer, path in port_spec.get_paths((0, 0)):
         if dx_straight > 0:
             path.segment((dx_straight, 0))
@@ -281,6 +285,7 @@ def u_turn_bend(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "bend"
 
     endpoint = (0, v_offset)
     radius = abs(v_offset) / 2
@@ -335,6 +340,7 @@ def u_bend_racetrack(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "bend"
 
     endpoint = (0, v_offset)
     radius = abs(v_offset) / 2
@@ -393,6 +399,7 @@ def l_turn_bend(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "bend"
 
     endpoint = (effective_radius, effective_radius)
     for layer, path in port_spec.get_paths((0, 0)):
@@ -449,6 +456,7 @@ def s_bend_var_width(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "s-bend"
 
     core_width, core_layer, *_ = _core_and_clad_info(port_spec)
     dw = start_section_width - core_width
@@ -542,6 +550,8 @@ def dir_coupl(
     )
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "dc"
+
     top = _pf.Reference(
         straight, (-0.5 * central_straight_length, 0.5 * (central_wg_width + coupl_wg_sep))
     )
@@ -626,6 +636,7 @@ def double_linear_inverse_taper(
         raise ValueError("'slab_removal_width' may not be negative.")
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "taper"
 
     lower_taper_start_width, *_ = _core_and_clad_info(start_port_spec)
     upper_taper_end_width, *_ = _core_and_clad_info(end_port_spec)
@@ -715,6 +726,7 @@ def cpw_probe_pad_linear(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "taper"
 
     central_width, gap, ground_width, offset, layer = _cpw_info(port_spec)
 
@@ -844,6 +856,8 @@ def eo_phase_shifter(
     y = 0.5 * (central_width + gap)
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "eo-ps"
+
     r = _pf.Reference(taper, (0, y))
     c.add(r)
     c.add_port(r["P0"])
@@ -994,6 +1008,8 @@ def mz_modulator_unbalanced(
     )
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "mzm"
+
     ps_top = _pf.Reference(phase_shifter)
     ps_bot = _pf.Reference(phase_shifter, (0, -phase_shifters_distance))
     c.add(ps_top, ps_bot)
@@ -1176,6 +1192,7 @@ def heater_pad(
             )
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "bondpad"
 
     x0 = 0.5 * pad_size[0]
     y0 = 0.5 * pad_size[1]
@@ -1246,6 +1263,7 @@ def heater_straight(
         )
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "to-ps"
 
     pad = heater_pad(
         pad_size=pad_size,
@@ -1311,6 +1329,7 @@ def heated_straight_waveguide(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
+    c.properties.__thumbnail__ = "to-ps"
 
     straight = c.add_reference(
         _pf.parametric.straight(port_spec=port_spec, length=wg_length, technology=technology)
