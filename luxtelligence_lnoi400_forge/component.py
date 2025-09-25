@@ -1,6 +1,7 @@
 from .utils import _core_and_clad_info, _cpw_info
 
 import photonforge as _pf
+import photonforge.typing as _pft
 
 import warnings as _warn
 import typing as _typ
@@ -10,14 +11,14 @@ import typing as _typ
 def mmi1x2(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    width: float = 6.0,
-    length: float = 26.75,
-    taper_width: float = 1.5,
-    taper_length: float = 25.0,
+    width: _pft.PositiveDimension = 6.0,
+    length: _pft.PositiveDimension = 26.75,
+    taper_width: _pft.PositiveDimension = 1.5,
+    taper_length: _pft.PositiveDimension = 25.0,
     port_ratio: float = 0.55,
-    technology: _pf.Technology = None,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """MMI with 1 port on one side and 2 ports on the other.
 
@@ -95,14 +96,14 @@ def mmi1x2(
 def mmi2x2(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    width: float = 5.0,
-    length: float = 76.5,
-    taper_width: float = 1.5,
-    taper_length: float = 25.0,
+    width: _pft.PositiveDimension = 5.0,
+    length: _pft.PositiveDimension = 76.5,
+    taper_width: _pft.PositiveDimension = 1.5,
+    taper_length: _pft.PositiveDimension = 25.0,
     port_ratio: float = 0.7,
-    technology: _pf.Technology = None,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """MMI with 2 ports on each side.
 
@@ -182,12 +183,12 @@ def mmi2x2(
 def s_bend_vert(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    h_extent: float = 100.0,
-    v_offset: float = 25.0,
-    dx_straight: float = 5.0,
-    technology: _pf.Technology = None,
+    h_extent: _pft.PositiveDimension = 100.0,
+    v_offset: _pft.Coordinate = 25.0,
+    dx_straight: _pft.Dimension = 5.0,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """S-bend waveguide section.
 
@@ -250,11 +251,11 @@ def s_bend_vert(
 def u_turn_bend(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    v_offset: float = 80.0,
-    euler_fraction: float = 1.0,
-    technology: _pf.Technology = None,
+    v_offset: _pft.Coordinate = 80.0,
+    euler_fraction: _pft.Fraction = 1.0,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """180° bend.
 
@@ -305,11 +306,11 @@ def u_turn_bend(
 def u_bend_racetrack(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG3000",
-    v_offset: float = 90.0,
-    euler_fraction: float = 1.0,
-    technology: _pf.Technology = None,
+    v_offset: _pft.Coordinate = 90.0,
+    euler_fraction: _pft.Fraction = 1.0,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """180° bend with defaults suitable for low-loss racetrack resonator.
 
@@ -360,11 +361,11 @@ def u_bend_racetrack(
 def l_turn_bend(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    effective_radius: float = 80.0,
-    euler_fraction: float = 1.0,
-    technology: _pf.Technology = None,
+    effective_radius: _pft.PositiveDimension = 80.0,
+    euler_fraction: _pft.Fraction = 1.0,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """90° bend.
 
@@ -419,12 +420,12 @@ def l_turn_bend(
 def s_bend_var_width(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    h_extent: float = 58.0,
-    v_offset: float = 14.5,
-    start_section_width: float = 0.8,
-    technology: _pf.Technology = None,
+    h_extent: _pft.PositiveDimension = 58.0,
+    v_offset: _pft.Coordinate = 14.5,
+    start_section_width: _pft.PositiveDimension = 0.8,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """S-bend waveguide section with varying profile width.
 
@@ -498,14 +499,14 @@ def s_bend_var_width(
 def dir_coupl(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    io_wg_sep: float = 30.6,
-    s_bend_length: float = 58.0,
-    central_straight_length: float = 16.92,
-    central_wg_width: float = 0.8,
-    coupl_wg_sep: float = 0.8,
-    technology: _pf.Technology = None,
+    io_wg_sep: _pft.PositiveDimension = 30.6,
+    s_bend_length: _pft.PositiveDimension = 58.0,
+    central_straight_length: _pft.Dimension = 16.92,
+    central_wg_width: _pft.PositiveDimension = 0.8,
+    coupl_wg_sep: _pft.Dimension = 0.8,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """Directional coupler with S bends.
 
@@ -558,7 +559,8 @@ def dir_coupl(
     bot = _pf.Reference(
         straight, (-0.5 * central_straight_length, -0.5 * (central_wg_width + coupl_wg_sep))
     )
-    c.add(top, bot)
+    if central_straight_length != 0:
+        c.add(top, bot)
 
     ref = c.add_reference(s_bend).connect("P0", bot["P0"])
     c.add_port(ref["P1"])
@@ -581,15 +583,15 @@ def double_linear_inverse_taper(
     *,
     start_port_spec: _typ.Union[str, _pf.PortSpec] = "SWG250",
     end_port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    lower_taper_end_width: float = 2.05,
-    lower_taper_length: float = 120.0,
-    upper_taper_start_width: float = 0.25,
-    upper_taper_length: float = 240.0,
-    slab_removal_width: float = 20.0,
-    input_ext: float = 0.0,
-    technology: _pf.Technology = None,
+    lower_taper_end_width: _pft.Dimension = 2.05,
+    lower_taper_length: _pft.PositiveDimension = 120.0,
+    upper_taper_start_width: _pft.Dimension = 0.25,
+    upper_taper_length: _pft.PositiveDimension = 240.0,
+    slab_removal_width: _pft.Dimension = 20.0,
+    input_ext: _pft.Dimension = 0.0,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """Dual layer inverse taper designed for matching with a lensed fiber.
 
@@ -685,12 +687,12 @@ def double_linear_inverse_taper(
 def cpw_probe_pad_linear(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "UniCPW",
-    pad_width: float = 80.0,
-    length_straight: float = 30.0,
-    length_tapered: float = 100.0,
-    technology: _pf.Technology = None,
+    pad_width: _pft.PositiveDimension = 80.0,
+    length_straight: _pft.PositiveDimension = 30.0,
+    length_tapered: _pft.PositiveDimension = 100.0,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """RF access line for high-frequency GSG probes.
 
@@ -787,13 +789,13 @@ def eo_phase_shifter(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
     tl_port_spec: _typ.Union[str, _pf.PortSpec] = "UniCPW-EO",
-    taper_length: float = 100.0,
-    rib_core_width_modulator: float = 2.5,
-    modulation_length: float = 1000.0,
+    taper_length: _pft.PositiveDimension = 100.0,
+    rib_core_width_modulator: _pft.PositiveDimension = 2.5,
+    modulation_length: _pft.PositiveDimension = 1000.0,
     draw_cpw: bool = True,
-    technology: _pf.Technology = None,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    circuit_model_kwargs: dict = {},
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel) = {},
 ) -> _pf.Component:
     """Phase modulator based on the Pockels effect.
 
@@ -879,20 +881,20 @@ def eo_phase_shifter(
 @_pf.parametric_component(name_prefix="MZM")
 def mz_modulator_unbalanced(
     *,
-    splitter: _pf.Component = None,
+    splitter: _typ.Union[_pf.Component, None] = None,
     tl_port_spec: _typ.Union[str, _pf.PortSpec] = "UniCPW-EO",
-    taper_length: float = 100.0,
-    rib_core_width_modulator: float = 2.5,
-    modulation_length: float = 7500.0,
-    length_imbalance: float = 100.0,
-    bias_tuning_section_length: float = 700.0,
-    rf_pad_start_width: float = 80.0,
-    rf_pad_length_straight: float = 10.0,
-    rf_pad_length_tapered: float = 190.0,
+    taper_length: _pft.PositiveDimension = 100.0,
+    rib_core_width_modulator: _pft.PositiveDimension = 2.5,
+    modulation_length: _pft.PositiveDimension = 7500.0,
+    length_imbalance: _pft.Coordinate = 100.0,
+    bias_tuning_section_length: _pft.PositiveDimension = 700.0,
+    rf_pad_start_width: _pft.PositiveDimension = 80.0,
+    rf_pad_length_straight: _pft.PositiveDimension = 10.0,
+    rf_pad_length_tapered: _pft.PositiveDimension = 190.0,
     draw_cpw: bool = True,
-    technology: _pf.Technology = None,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    circuit_model_kwargs: dict = {},
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel) = {},
 ) -> _pf.Component:
     """Mach-Zehnder modulator based on the Pockels effect.
 
@@ -1088,11 +1090,11 @@ def mz_modulator_unbalanced(
 @_pf.parametric_component(name_prefix="CHIP_FRAME")
 def chip_frame(
     *,
-    x_size: _typ.Literal[5000, 5050, 10000, 10100, 20000, 20200] = 10100,
-    y_size: _typ.Literal[5000, 5050, 10000, 10100, 20000, 20200] = 5050,
-    center: _typ.Sequence[float] = (0, 0),
-    exclusion_zone_width: float = 50,
-    technology: _pf.Technology = None,
+    x_size: _pft.annotate(_typ.Literal[5000, 5050, 10000, 10100, 20000, 20200], units="μm") = 10100,
+    y_size: _pft.annotate(_typ.Literal[5000, 5050, 10000, 10100, 20000, 20200], units="μm") = 5050,
+    center: _pft.Coordinate2D = (0, 0),
+    exclusion_zone_width: _pft.Dimension = 50,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
 ) -> _pf.Component:
     """Chip extent and exclusion zone.
@@ -1160,10 +1162,10 @@ def chip_frame(
 @_pf.parametric_component(name_prefix="HEATER_PAD")
 def heater_pad(
     *,
-    pad_size: _typ.Sequence[float] = (100.0, 100.0),
-    taper_length: float = 10.0,
-    contact_width: float = 2.7,
-    technology: _pf.Technology = None,
+    pad_size: _pft.PositiveDimension2D = (100.0, 100.0),
+    taper_length: _pft.PositiveDimension = 10.0,
+    contact_width: _pft.PositiveDimension = 2.7,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
 ) -> _pf.Component:
     """Bonding pad for a heater.
@@ -1220,11 +1222,11 @@ def heater_pad(
 @_pf.parametric_component(name_prefix="HEATER_STRAIGHT")
 def heater_straight(
     *,
-    heater_length: float = 150.0,
-    heater_width: float = 1.0,
-    pad_size: _typ.Sequence[float] = (100.0, 100.0),
-    taper_length: float = 10.0,
-    technology: _pf.Technology = None,
+    heater_length: _pft.PositiveDimension = 150.0,
+    heater_width: _pft.PositiveDimension = 1.0,
+    pad_size: _pft.PositiveDimension2D = (100.0, 100.0),
+    taper_length: _pft.PositiveDimension = 10.0,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
 ) -> _pf.Component:
     """Bonding pad for a heater.
@@ -1287,15 +1289,15 @@ def heater_straight(
 def heated_straight_waveguide(
     *,
     port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
-    wg_length: float = 700.0,
-    heater_width: float = 1.0,
-    heater_offset: float = 1.22,
-    pad_size: _typ.Sequence[float] = (100.0, 100.0),
-    taper_length: float = 10.0,
+    wg_length: _pft.PositiveDimension = 700.0,
+    heater_width: _pft.PositiveDimension = 1.0,
+    heater_offset: _pft.Coordinate = 1.22,
+    pad_size: _pft.PositiveDimension2D = (100.0, 100.0),
+    taper_length: _pft.PositiveDimension = 10.0,
     draw_heater: bool = True,
-    technology: _pf.Technology = None,
+    technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: dict = {},
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
 ) -> _pf.Component:
     """Straight heated waveguide section.
 

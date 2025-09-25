@@ -1,30 +1,28 @@
 import tidy3d as td
 import photonforge as pf
-
-
-_Medium = td.components.medium.MediumType
+import photonforge.typing as pft
 
 
 @pf.parametric_technology
 def lnoi400(
     *,
-    ln_thickness: float = 0.4,
-    slab_thickness: float = 0.2,
-    sidewall_angle: float = 13.5,
-    box_thickness: float = 4.7,
-    tl_thickness: float = 0.9,
-    tl_separation: float = 1,
+    ln_thickness: pft.PositiveDimension = 0.4,
+    slab_thickness: pft.PositiveDimension = 0.2,
+    sidewall_angle: pft.Angle = 13.5,
+    box_thickness: pft.PositiveDimension = 4.7,
+    tl_thickness: pft.PositiveDimension = 0.9,
+    tl_separation: pft.PositiveDimension = 1,
     include_substrate: bool = False,
     include_top_opening: bool = False,
-    sio2: dict[str, _Medium] = {
+    sio2: dict[str, pft.Medium] = {
         "optical": td.material_library["SiO2"]["Palik_Lossless"],
         "electrical": td.Medium(permittivity=3.9, name="SiO2"),
     },
-    si: dict[str, _Medium] = {
+    si: dict[str, pft.Medium] = {
         "optical": td.material_library["cSi"]["Li1993_293K"],
         "electrical": td.Medium(permittivity=11.7, name="Si"),
     },
-    ln: dict[str, _Medium] = {
+    ln: dict[str, pft.Medium] = {
         "optical": td.material_library["LiNbO3"]["Zelmon1997"](optical_axis=1),
         "electrical": td.AnisotropicMedium(
             xx=td.Medium(permittivity=44),
@@ -32,7 +30,7 @@ def lnoi400(
             zz=td.Medium(permittivity=44),
         ),
     },
-    tl_metal: dict[str, _Medium] = {
+    tl_metal: dict[str, pft.Medium] = {
         "optical": td.material_library["Au"]["JohnsonChristy1972"],
         "electrical": td.LossyMetalMedium(
             conductivity=41,
@@ -40,7 +38,7 @@ def lnoi400(
             fit_param=td.SurfaceImpedanceFitterParam(max_num_poles=16),
         ),
     },
-    opening: _Medium = td.Medium(permittivity=1.0, name="Opening"),
+    opening: pft.Medium = td.Medium(permittivity=1.0, name="Opening"),
 ) -> pf.Technology:
     """Create a technology for the LNOI400 PDK.
 
