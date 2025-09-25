@@ -43,22 +43,21 @@ def lnoi400(
     """Create a technology for the LNOI400 PDK.
 
     Args:
-        ln_thickness (float): LiNbO₃ layer thickness.
-        slab_thickness (float): Partially etched slab thickness in LiNbO₃.
-        sidewall_angle (float): Sidewall angle (in degrees) for LiNbO₃
-          etching.
-        box_thickness (float): Thickness of the bottom oxide clad.
-        tl_thickness (float): TL layer thickness.
-        tl_separation (float): Separation between the LiNbO₃ and TL layers.
-        include_substrate (bool): Flag indicating whether or not to include
-          the silicon substrate.
-        include_top_opening (bool): Flag indicating whether or not to
-          include the open region above the last extrusion layer.
-        sio2 (Medium): Oxide and background medium.
-        si (Medium): Silicon medium.
-        ln (Medium): LiNbO₃ medium.
-        tl_metal (Medium): TL and heater metal medium.
-        opening (Medium): Medium for openings.
+        ln_thickness: LiNbO₃ layer thickness.
+        slab_thickness: Partially etched slab thickness in LiNbO₃.
+        sidewall_angle: Sidewall angle (in degrees) for LiNbO₃ etching.
+        box_thickness: Thickness of the bottom oxide clad.
+        tl_thickness: TL layer thickness.
+        tl_separation: Separation between the LiNbO₃ and TL layers.
+        include_substrate: Flag indicating whether or not to include the
+          silicon substrate.
+        include_top_opening: Flag indicating whether or not to include the
+          open region above the last extrusion layer.
+        sio2: Oxide and background medium.
+        si: Silicon medium.
+        ln: LiNbO₃ medium.
+        tl_metal: TL and heater metal medium.
+        opening: Medium for openings.
 
     Returns:
         Technology: E-Beam PDK technology definition.

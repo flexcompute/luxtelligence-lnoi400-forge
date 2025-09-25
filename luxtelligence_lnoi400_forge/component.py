@@ -57,7 +57,7 @@ def mmi1x2(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "mmi"
+    c.properties.__thumbnail__ = "mmi1x2"
 
     core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
     margin = 0.5 * (clad_width - core_width)
@@ -142,7 +142,7 @@ def mmi2x2(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "mmi"
+    c.properties.__thumbnail__ = "mmi2x2"
 
     core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
     margin = 0.5 * (clad_width - core_width)
@@ -228,7 +228,7 @@ def s_bend_vert(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "bend"
+    c.properties.__thumbnail__ = "s-bend"
 
     for layer, path in port_spec.get_paths((0, 0)):
         if dx_straight > 0:
@@ -286,7 +286,7 @@ def u_turn_bend(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "bend"
+    c.properties.__thumbnail__ = "u-bend"
 
     endpoint = (0, v_offset)
     radius = abs(v_offset) / 2
@@ -341,7 +341,7 @@ def u_bend_racetrack(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "bend"
+    c.properties.__thumbnail__ = "u-bend"
 
     endpoint = (0, v_offset)
     radius = abs(v_offset) / 2
@@ -728,7 +728,7 @@ def cpw_probe_pad_linear(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "taper"
+    c.properties.__thumbnail__ = "cpw-pad"
 
     central_width, gap, ground_width, offset, layer = _cpw_info(port_spec)
 
@@ -858,7 +858,7 @@ def eo_phase_shifter(
     y = 0.5 * (central_width + gap)
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "eo-ps"
+    c.properties.__thumbnail__ = "eo_ps"
 
     r = _pf.Reference(taper, (0, y))
     c.add(r)
@@ -1265,7 +1265,7 @@ def heater_straight(
         )
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "to-ps"
+    c.properties.__thumbnail__ = "to_ps"
 
     pad = heater_pad(
         pad_size=pad_size,
@@ -1331,7 +1331,7 @@ def heated_straight_waveguide(
         port_spec = technology.ports[port_spec]
 
     c = _pf.Component(name, technology=technology)
-    c.properties.__thumbnail__ = "to-ps"
+    c.properties.__thumbnail__ = "to_ps"
 
     straight = c.add_reference(
         _pf.parametric.straight(port_spec=port_spec, length=wg_length, technology=technology)
