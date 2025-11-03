@@ -64,3 +64,32 @@ but the actual final dimensions may differ due to several fabrication-specific
 effects. In particular, doping profiles are represented with hard-boundary,
 homogeneous solids, but, in practice will present process-dependent variations
 with smooth boundaries.
+
+
+## Changelog
+
+### 1.2.4 - 2025-04-18
+
+- Better error detection when inspecting port specifications
+
+
+### 1.2.0 - 2025-03-04
+
+- Added electrical ports and terminals.
+
+
+### 1.1.0 - 2024-12-03
+
+- Added arguments `slab_removal_width` and `input_ext` to `double_linear_inverse_taper`.
+- Added arguments `center` and `exclusion_zone_width` to `chip_frame`.
+- Added argument `start_section_width` to `s_bend_vert`.
+- Added parametric components `dir_coupl`, `heater_pad`, `heater_straight`, and `heated_straight_waveguide`.
+- `chip_frame` is centered around the origin by default.
+- Changed `mz_modulator_unbalanced` default length.
+- Removed port symmetries that were only valid for fundamental modes.
+
+
+### 1.0.1 - 2024-10-17
+
+- Add missing technology docstring.
+- Fixed port symmetries in MMI2x2.
