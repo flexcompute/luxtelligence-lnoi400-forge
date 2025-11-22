@@ -18,7 +18,8 @@ def mmi1x2(
     port_ratio: float = 0.55,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """MMI with 1 port on one side and 2 ports on the other.
 
@@ -33,8 +34,7 @@ def mmi1x2(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         MMI Component with layout, ports and model.
@@ -88,7 +88,17 @@ def mmi1x2(
     c.add_port(_pf.Port((x, -offset), 180, port_spec, inverted=True))
     c.add_port(_pf.Port((x, offset), 180, port_spec, inverted=True))
 
-    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -103,7 +113,8 @@ def mmi2x2(
     port_ratio: float = 0.7,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """MMI with 2 ports on each side.
 
@@ -118,8 +129,7 @@ def mmi2x2(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         MMI Component with layout, ports and model.
@@ -175,7 +185,17 @@ def mmi2x2(
     c.add_port(_pf.Port((x, -offset), 180, port_spec, inverted=True))
     c.add_port(_pf.Port((x, offset), 180, port_spec, inverted=True))
 
-    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -188,7 +208,8 @@ def s_bend_vert(
     dx_straight: _pft.Dimension = 5.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """S-bend waveguide section.
 
@@ -201,8 +222,7 @@ def s_bend_vert(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the S-bend, ports and model.
@@ -243,7 +263,17 @@ def s_bend_vert(
     c.add_port(_pf.Port((0, 0), 0, port_spec))
     c.add_port(_pf.Port((h_extent + 2 * dx_straight, v_offset), 180, port_spec, inverted=True))
 
-    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -255,7 +285,8 @@ def u_turn_bend(
     euler_fraction: _pft.Fraction = 1.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """180° bend.
 
@@ -267,8 +298,7 @@ def u_turn_bend(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the bend, ports and model.
@@ -298,7 +328,17 @@ def u_turn_bend(
     c.add_port(_pf.Port((0, 0), 0, port_spec))
     c.add_port(_pf.Port(endpoint, 0, port_spec, inverted=True))
 
-    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -310,7 +350,8 @@ def u_bend_racetrack(
     euler_fraction: _pft.Fraction = 1.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """180° bend with defaults suitable for low-loss racetrack resonator.
 
@@ -322,8 +363,7 @@ def u_bend_racetrack(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the bend, ports and model.
@@ -353,7 +393,17 @@ def u_bend_racetrack(
     c.add_port(_pf.Port((0, 0), 0, port_spec))
     c.add_port(_pf.Port(endpoint, 0, port_spec, inverted=True))
 
-    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -365,7 +415,8 @@ def l_turn_bend(
     euler_fraction: _pft.Fraction = 1.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(port_symmetries=[(1,0)]),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """90° bend.
 
@@ -378,8 +429,7 @@ def l_turn_bend(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the bend, ports and model.
@@ -410,9 +460,19 @@ def l_turn_bend(
     c.add_port(_pf.Port((0, 0), 0, port_spec))
     c.add_port(_pf.Port(endpoint, -90, port_spec, inverted=True))
 
-    model_kwargs = {"port_symmetries": [("P0", "P1", {"P1": "P0"})]}
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model_kwargs = {"port_symmetries": [(1, 0)]}
+        model_kwargs.update(tidy3d_model_kwargs)
+        model = _pf.Tidy3DModel(**model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -425,7 +485,8 @@ def s_bend_var_width(
     start_section_width: _pft.PositiveDimension = 0.8,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """S-bend waveguide section with varying profile width.
 
@@ -438,8 +499,7 @@ def s_bend_var_width(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the S-bend, ports and model.
@@ -489,9 +549,17 @@ def s_bend_var_width(
     c.add_port(_pf.Port((0, 0), 0, start_port_spec))
     c.add_port(_pf.Port((h_extent, v_offset), 180, port_spec, inverted=True))
 
-    model_kwargs = {}
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -506,7 +574,8 @@ def dir_coupl(
     coupl_wg_sep: _pft.Dimension = 0.8,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """Directional coupler with S bends.
 
@@ -521,8 +590,7 @@ def dir_coupl(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the directional coupler, ports and model.
@@ -574,7 +642,17 @@ def dir_coupl(
     ref = c.add_reference(s_bend).connect("P0", top["P1"])
     c.add_port(ref["P1"])
 
-    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -591,7 +669,8 @@ def double_linear_inverse_taper(
     input_ext: _pft.Dimension = 0.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """Dual layer inverse taper designed for matching with a lensed fiber.
 
@@ -613,8 +692,7 @@ def double_linear_inverse_taper(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the taper, ports and model.
@@ -679,7 +757,17 @@ def double_linear_inverse_taper(
     c.add_port(_pf.Port((-input_ext if input_ext > 0 else 0, 0), 0, start_port_spec))
     c.add_port(_pf.Port((length, 0), 180, end_port_spec, inverted=True))
 
-    c.add_model(_pf.Tidy3DModel(**tidy3d_model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.Tidy3DModel(**tidy3d_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -692,7 +780,8 @@ def cpw_probe_pad_linear(
     length_tapered: _pft.PositiveDimension = 100.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """RF access line for high-frequency GSG probes.
 
@@ -709,8 +798,7 @@ def cpw_probe_pad_linear(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the taper and port.
@@ -795,7 +883,8 @@ def eo_phase_shifter(
     draw_cpw: bool = True,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel) = {},
+    model: _pf.Model | None = _pf.CircuitModel(),
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) = {},
 ) -> _pf.Component:
     """Phase modulator based on the Pockels effect.
 
@@ -814,8 +903,7 @@ def eo_phase_shifter(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        circuit_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.CircuitModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the modulator, ports, and model.
@@ -874,7 +962,17 @@ def eo_phase_shifter(
         r = c.add_reference(tl)
         c.add_port({"E0": r["E0"], "E1": r["E1"]})
 
-    c.add_model(_pf.CircuitModel(**circuit_model_kwargs), "Circuit")
+    if circuit_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'circuit_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.CircuitModel(**circuit_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -894,7 +992,8 @@ def mz_modulator_unbalanced(
     draw_cpw: bool = True,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel) = {},
+    model: _pf.Model | None = _pf.CircuitModel(),
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) = {},
 ) -> _pf.Component:
     """Mach-Zehnder modulator based on the Pockels effect.
 
@@ -921,8 +1020,7 @@ def mz_modulator_unbalanced(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        circuit_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.CircuitModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the modulator, ports, and model.
@@ -1083,7 +1181,17 @@ def mz_modulator_unbalanced(
             }
         )
 
-    c.add_model(_pf.CircuitModel(**circuit_model_kwargs), "Circuit")
+    if circuit_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'circuit_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model = _pf.CircuitModel(**circuit_model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
 
 
@@ -1177,8 +1285,7 @@ def heater_pad(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the bonding pad centered at the origin.
@@ -1297,7 +1404,8 @@ def heated_straight_waveguide(
     draw_heater: bool = True,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel) = {},
+    model: _pf.Model | None = _pf.Tidy3DModel(port_symmetries=[(1,0)]),
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """Straight heated waveguide section.
 
@@ -1312,8 +1420,7 @@ def heated_straight_waveguide(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        tidy3d_model_kwargs: Dictionary of keyword arguments passed to the
-          component's :class:`photonforge.Tidy3DModel`.
+        model: Model to be used with this component.
 
     Returns:
         Component with the waveguide, heater, ports and model.
@@ -1352,7 +1459,17 @@ def heated_straight_waveguide(
     c.add_port(straight["P0"], "P0")
     c.add_port(straight["P1"], "P1")
 
-    model_kwargs = {"port_symmetries": [("P0", "P1", {"P1": "P0"})]}
-    model_kwargs.update(tidy3d_model_kwargs)
-    c.add_model(_pf.Tidy3DModel(**model_kwargs), "Tidy3D")
+    if tidy3d_model_kwargs is not None:
+        _warn.warn(
+            "Argument 'tidy3d_model_kwargs' is deprecated. Please use 'model' instead.",
+            RuntimeWarning,
+            2,
+        )
+        model_kwargs = {"port_symmetries": [(1, 0)]}
+        model_kwargs.update(tidy3d_model_kwargs)
+        model = _pf.Tidy3DModel(**model_kwargs)
+
+    if model is not None:
+        c.add_model(model)
+
     return c
