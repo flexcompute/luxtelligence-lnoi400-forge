@@ -128,7 +128,10 @@ def lnoi400(
     swg_port_gap = min(2.1, box_thickness)
     swg_port_limits = (-swg_port_gap, slab_thickness + swg_port_gap)
 
-    technology = pf.Technology("LNOI400", "1.3.0", layers, extrusion_specs, {}, sio2)
+    # default T-rail full height
+    t_height = 3
+
+    technology = pf.Technology("LNOI400", "1.4.0", layers, extrusion_specs, {}, sio2)
     technology.ports = {
         "RWG1000": pf.PortSpec(
             description="LN single mode ridge waveguide for C-band, TE mode",
@@ -159,6 +162,15 @@ def lnoi400(
         ),
         "UniCPW-EO": pf.cpw_spec(
             (21, 0), 10, 4, 180, added_solver_modes=0, target_neff=2.2, technology=technology
+        ),
+        "UniCPW-HS": pf.cpw_spec(
+            (21, 0),
+            21,
+            4 + 2 * t_height,
+            180,
+            added_solver_modes=0,
+            target_neff=2.2,
+            technology=technology,
         ),
     }
 

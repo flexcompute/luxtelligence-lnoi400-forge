@@ -4,10 +4,10 @@ import numpy
 import typing
 
 
-def _core_and_clad_info(port_spec: pf.PortSpec):
-    ridge = port_spec.path_profile_for((2, 0))
-    slab = port_spec.path_profile_for((3, 0))
-    empty = port_spec.path_profile_for((3, 1))
+def _core_and_clad_info(port_spec: pf.PortSpec, technology: pf.Technology):
+    ridge = port_spec.path_profile_for((2, 0), technology)
+    slab = port_spec.path_profile_for((3, 0), technology)
+    empty = port_spec.path_profile_for((3, 1), technology)
     if empty is None:
         if ridge is None or slab is None:
             raise RuntimeError(

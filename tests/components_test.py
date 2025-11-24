@@ -13,27 +13,25 @@ def test_components():
 
 def test_defaults(request):
     pf.config.default_technology = lxt.lnoi400()
-    for component in [getattr(lxt.component, n)() for n in lxt.component_names]:
-        name = component.name
-        if name == "UBEND_RACETRACK":
-            name = "UBEND"
-        elif name == "UBEND":
-            name = ""
+    components = {
+        c.name[: c.name.rfind("_")]: c
+        for c in (getattr(lxt.component, n)() for n in lxt.component_names)
+    }
+    components["UBEND"] = components.pop("UBEND_RACETRACK")
 
-        path = request.path.parent / "gdsii" / f"{name}.gds"
-        if not path.is_file():
-            continue
-
+    for path in (request.path.parent / "gdsii").glob("*.gds"):
         gdsii = pf.find_top_level(*pf.load_layout(path).values())
         assert len(gdsii) == 1
         gdsii = gdsii[0]
 
+        component = components[path.stem]
+
         diff = pf.Component(component.name + ".diff")
         total = 0
         error = 0
-        for layer in component.layers(include_dependencies=True) + gdsii.layers(
-            include_dependencies=True
-        ):
+        layers = component.layers(include_dependencies=True)
+        layers.update(gdsii.layers(include_dependencies=True))
+        for layer in layers:
             gdsii_structs = gdsii.get_structures(layer)
             diff_structs = pf.offset(
                 pf.boolean(component.get_structures(layer), gdsii_structs, "^"),
@@ -45,13 +43,15 @@ def test_defaults(request):
                 diff.add(layer, *diff_structs)
                 error += sum(x.area() for x in diff_structs)
 
-        valid = error / total < {
+        tol = {
             "DIR_COUPL": 0.059,
-            "MZM": 4e-5,
+            "MZM": 4.0e-5,
+            "MZM_HS": 4.2e-5,
             "SBEND": 0.011,
             "SBEND_VAR_WIDTH": 0.083,
-            "UBEND_RACETRACK": 6e-5,
-        }.get(component.name, 1e-5)
-        if not valid:
+            "UBEND": 6e-5,
+        }.get(path.stem, 1e-5)
+        if error > tol * total:
+            component.write_gds()
             diff.write_gds()
             assert False, f"{component.name} error: {error / total:g}"

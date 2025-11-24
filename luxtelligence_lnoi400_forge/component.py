@@ -1,5 +1,6 @@
 from .utils import _core_and_clad_info, _cpw_info
 
+import numpy as _np
 import photonforge as _pf
 import photonforge.typing as _pft
 
@@ -19,7 +20,7 @@ def mmi1x2(
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
     model: _pf.Model | None = _pf.Tidy3DModel(),
-    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
+    tidy3d_model_kwargs: _pft.kwargs_for(_pf.Model, deprecated=True) | None = None,
 ) -> _pf.Component:
     """MMI with 1 port on one side and 2 ports on the other.
 
@@ -59,7 +60,7 @@ def mmi1x2(
     c = _pf.Component(name, technology=technology)
     c.properties.__thumbnail__ = "mmi1x2"
 
-    core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
+    core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec, technology)
     margin = 0.5 * (clad_width - core_width)
 
     c.add(
@@ -154,7 +155,7 @@ def mmi2x2(
     c = _pf.Component(name, technology=technology)
     c.properties.__thumbnail__ = "mmi2x2"
 
-    core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec)
+    core_width, core_layer, clad_width, clad_layer = _core_and_clad_info(port_spec, technology)
     margin = 0.5 * (clad_width - core_width)
 
     c.add(
@@ -415,7 +416,7 @@ def l_turn_bend(
     euler_fraction: _pft.Fraction = 1.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    model: _pf.Model | None = _pf.Tidy3DModel(port_symmetries=[(1,0)]),
+    model: _pf.Model | None = _pf.Tidy3DModel(port_symmetries=[(1, 0)]),
     tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """90° bend.
@@ -519,7 +520,7 @@ def s_bend_var_width(
     c = _pf.Component(name, technology=technology)
     c.properties.__thumbnail__ = "s-bend"
 
-    core_width, core_layer, *_ = _core_and_clad_info(port_spec)
+    core_width, core_layer, *_ = _core_and_clad_info(port_spec, technology)
     dw = start_section_width - core_width
 
     original_profiles = port_spec.path_profiles
@@ -718,8 +719,8 @@ def double_linear_inverse_taper(
     c = _pf.Component(name, technology=technology)
     c.properties.__thumbnail__ = "taper"
 
-    lower_taper_start_width, *_ = _core_and_clad_info(start_port_spec)
-    upper_taper_end_width, *_ = _core_and_clad_info(end_port_spec)
+    lower_taper_start_width, *_ = _core_and_clad_info(start_port_spec, technology)
+    upper_taper_end_width, *_ = _core_and_clad_info(end_port_spec, technology)
 
     slope = (lower_taper_end_width - lower_taper_start_width) / lower_taper_length
     lower_taper_end_width = lower_taper_start_width + slope * (
@@ -872,6 +873,88 @@ def cpw_probe_pad_linear(
     return c
 
 
+def _t_rail(
+    base_height: _pft.PositiveDimension = 1.5,
+    base_width: _pft.PositiveDimension = 7.0,
+    top_height: _pft.PositiveDimension = 1.5,
+    top_width: _pft.PositiveDimension = 44.7,
+    rounding_radius: _pft.Dimension = 0.5,
+) -> _pf.Polygon:
+    rounding_radius = 0.5 * min(
+        2 * rounding_radius, base_height, top_height, (top_width - base_width) / 2
+    )
+    x0 = 0.5 * base_width
+    x1 = 0.5 * top_width
+    y1 = base_height + top_height
+    if rounding_radius > 0:
+        p = _pf.Path((x0 + rounding_radius, 0), 0.1 * rounding_radius)
+        if base_height > 2 * rounding_radius:
+            p.arc(-90, -180, rounding_radius).segment((x0, base_height - rounding_radius)).arc(
+                180, 90, rounding_radius
+            )
+        else:
+            p.arc(-90, -270, rounding_radius)
+        if x1 - x0 > 2 * rounding_radius:
+            p.segment((x1 - rounding_radius, base_height))
+        if top_height > 2 * rounding_radius:
+            p.arc(-90, 0, rounding_radius).segment((x1, y1 - rounding_radius)).arc(
+                0, 90, rounding_radius
+            )
+        else:
+            p.arc(-90, 90, rounding_radius)
+        v = p.spine()
+        return _pf.Polygon(_np.vstack((v, v[::-1] * (-1, 1))))
+
+    return _pf.Polygon(
+        [
+            (x0, 0),
+            (x0, base_height),
+            (x1, base_height),
+            (x1, y1),
+            (-x1, y1),
+            (-x1, base_height),
+            (-x0, base_height),
+            (-x0, 0),
+        ]
+    )
+
+
+@_pf.parametric_component(name_prefix="T_RAIL_CPW")
+def _cpw_with_t_rails(
+    *,
+    port_spec: _typ.Union[str, _pf.PortSpec],
+    length: _pft.PositiveDimension,
+    technology: _pf.Technology,
+    base_height: _pft.PositiveDimension = 1.5,
+    base_width: _pft.PositiveDimension = 7.0,
+    top_height: _pft.PositiveDimension = 1.5,
+    top_width: _pft.PositiveDimension = 44.7,
+    gap: _pft.PositiveDimension = 5.0,
+    rounding_radius: _pft.Dimension = 0.5,
+) -> _pf.Component:
+    if isinstance(port_spec, str):
+        port_spec = technology.ports[port_spec]
+
+    central_width, tl_gap, _, _, _ = _cpw_info(port_spec)
+
+    shape = _t_rail(base_height, base_width, top_height, top_width, rounding_radius)
+    t_rail = _pf.Component("T_RAIL", technology)
+    t_rail.add((21, 0), shape, shape.copy().transform((0, tl_gap), x_reflection=True))
+
+    c = _pf.parametric.straight(port_spec=port_spec, length=length, technology=technology)
+    c.name = ""
+
+    period = top_width + gap
+    count = int(length / period)
+    if count > 0:
+        x = 0.5 * (length - (count - 1) * period)
+        y = -0.5 * central_width - tl_gap
+        spacing = (period, central_width + tl_gap)
+        c.add(_pf.Reference(t_rail, (x, y), columns=count, rows=2, spacing=spacing))
+
+    return c
+
+
 @_pf.parametric_component(name_prefix="EO_SHIFTER")
 def eo_phase_shifter(
     *,
@@ -879,12 +962,16 @@ def eo_phase_shifter(
     tl_port_spec: _typ.Union[str, _pf.PortSpec] = "UniCPW-EO",
     taper_length: _pft.PositiveDimension = 100.0,
     rib_core_width_modulator: _pft.PositiveDimension = 2.5,
-    modulation_length: _pft.PositiveDimension = 1000.0,
+    modulation_length: _pft.PositiveDimension = 7500.0,
+    rf_pad_width: _pft.PositiveDimension = 80.0,
+    rf_pad_length_straight: _pft.PositiveDimension = 10.0,
+    rf_pad_length_tapered: _pft.PositiveDimension = 190.0,
     draw_cpw: bool = True,
+    with_trails: bool = False,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
     model: _pf.Model | None = _pf.CircuitModel(),
-    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) = {},
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """Phase modulator based on the Pockels effect.
 
@@ -899,7 +986,12 @@ def eo_phase_shifter(
         rib_core_width_modulator: Waveguide core width in the phase
           modulation section.
         modulation_length: Length of the phase modulation section.
+        rf_pad_width: Width of the central conductor on the bonding side.
+        rf_pad_length_straight: Length of the straight section of the RF
+          pad, opposite to the transmission line.
+        rf_pad_length_tapered: Length of the tapered section of the RF pad.
         draw_cpw: If ``False``, the CPW transmission line is not included.
+        with_trails: If ``True``, includes T-rails in the CPW.
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
@@ -927,7 +1019,7 @@ def eo_phase_shifter(
     if isinstance(tl_port_spec, str):
         tl_port_spec = technology.ports[tl_port_spec]
 
-    core_width, *_ = _core_and_clad_info(port_spec)
+    core_width, *_ = _core_and_clad_info(port_spec, technology)
     added_width = rib_core_width_modulator - core_width
     mod_spec = port_spec.copy()
     path_profiles = port_spec.path_profiles
@@ -956,11 +1048,34 @@ def eo_phase_shifter(
     c.add_port(r["P0"])
 
     if draw_cpw:
-        tl = _pf.parametric.straight(
-            port_spec=tl_port_spec, length=modulation_length, technology=technology
+        if with_trails:
+            tl = _cpw_with_t_rails(
+                port_spec=tl_port_spec, length=modulation_length, technology=technology
+            )
+        else:
+            tl = _pf.parametric.straight(
+                port_spec=tl_port_spec, length=modulation_length, technology=technology
+            )
+        pad = cpw_probe_pad_linear(
+            port_spec=tl_port_spec,
+            pad_width=rf_pad_width,
+            length_straight=rf_pad_length_straight,
+            length_tapered=rf_pad_length_tapered,
+            technology=technology,
         )
         r = c.add_reference(tl)
-        c.add_port({"E0": r["E0"], "E1": r["E1"]})
+        p0 = c.add_reference(pad).connect("E0", r["E0"])
+        p1 = c.add_reference(pad).connect("E0", r["E1"])
+        c.add_terminal(
+            {
+                "G0_in": p0["G0"],
+                "S_in": p0["S"],
+                "G1_in": p0["G1"],
+                "G0_out": p1["G1"],
+                "S_out": p1["S"],
+                "G1_out": p1["G0"],
+            }
+        )
 
     if circuit_model_kwargs is not None:
         _warn.warn(
@@ -976,6 +1091,71 @@ def eo_phase_shifter(
     return c
 
 
+@_pf.parametric_component(name_prefix="EO_SHIFTER_HS")
+def eo_phase_shifter_high_speed(
+    *,
+    port_spec: _typ.Union[str, _pf.PortSpec] = "RWG1000",
+    tl_port_spec: _typ.Union[str, _pf.PortSpec] = "UniCPW-HS",
+    taper_length: _pft.PositiveDimension = 100.0,
+    rib_core_width_modulator: _pft.PositiveDimension = 2.5,
+    modulation_length: _pft.PositiveDimension = 7500.0,
+    rf_pad_width: _pft.PositiveDimension = 80.0,
+    rf_pad_length_straight: _pft.PositiveDimension = 10.0,
+    rf_pad_length_tapered: _pft.PositiveDimension = 190.0,
+    draw_cpw: bool = True,
+    with_trails: bool = True,
+    technology: _typ.Union[_pf.Technology, None] = None,
+    name: str = "",
+    model: _pf.Model | None = _pf.CircuitModel(),
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) | None = None,
+) -> _pf.Component:
+    """High-speed phase modulator based on the Pockels effect.
+
+    The modulator waveguide is located within the upper gap of an RF
+    coplanar waveguide.
+
+    Args:
+        port_spec: Port specification for the optical waveguide.
+        tl_port_spec: Port specification for the CPW transmission line.
+        taper_length: Length of the tapering section between the modulation
+          and routing waveguides.
+        rib_core_width_modulator: Waveguide core width in the phase
+          modulation section.
+        modulation_length: Length of the phase modulation section.
+        rf_pad_width: Width of the central conductor on the bonding side.
+        rf_pad_length_straight: Length of the straight section of the RF
+          pad, opposite to the transmission line.
+        rf_pad_length_tapered: Length of the tapered section of the RF pad.
+        draw_cpw: If ``False``, the CPW transmission line is not included.
+        with_trails: If ``True``, includes T-rails in the CPW.
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
+        model: Model to be used with this component.
+
+    Returns:
+        Component with the modulator, ports, and model.
+    """
+    c = eo_phase_shifter(
+        port_spec=port_spec,
+        tl_port_spec=tl_port_spec,
+        taper_length=taper_length,
+        rib_core_width_modulator=rib_core_width_modulator,
+        modulation_length=modulation_length,
+        rf_pad_width=rf_pad_width,
+        rf_pad_length_straight=rf_pad_length_straight,
+        rf_pad_length_tapered=rf_pad_length_tapered,
+        draw_cpw=draw_cpw,
+        with_trails=with_trails,
+        technology=technology,
+        name=name,
+        model=model,
+        circuit_model_kwargs=circuit_model_kwargs,
+    )
+    c.name = ""
+    return c
+
+
 @_pf.parametric_component(name_prefix="MZM")
 def mz_modulator_unbalanced(
     *,
@@ -986,14 +1166,19 @@ def mz_modulator_unbalanced(
     modulation_length: _pft.PositiveDimension = 7500.0,
     length_imbalance: _pft.Coordinate = 100.0,
     bias_tuning_section_length: _pft.PositiveDimension = 700.0,
-    rf_pad_start_width: _pft.PositiveDimension = 80.0,
+    rf_pad_width: _pft.PositiveDimension = 80.0,
     rf_pad_length_straight: _pft.PositiveDimension = 10.0,
-    rf_pad_length_tapered: _pft.PositiveDimension = 190.0,
+    rf_pad_length_tapered: _pft.PositiveDimension = 300.0,
+    heater_width: _pft.PositiveDimension = 1.0,
+    heater_offset: _pft.Coordinate = 1.2,
+    heater_pad_size: _pft.PositiveDimension2D = (75.0, 75.0),
     draw_cpw: bool = True,
+    with_trails: bool = False,
+    with_heater: bool = False,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
     model: _pf.Model | None = _pf.CircuitModel(),
-    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) = {},
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """Mach-Zehnder modulator based on the Pockels effect.
 
@@ -1012,11 +1197,14 @@ def mz_modulator_unbalanced(
         length_imbalance: Length difference between the two arms of the MZI.
         bias_tuning_section_length: Length of the horizontal section that
           can be used for phase tuning.
-        rf_pad_start_width: Width of the central conductor on the pad side.
+        rf_pad_width: Width of the central conductor on the pad side.
         rf_pad_length_straight: Length of the straight section of the taper
           on the pad side.
         rf_pad_length_tapered: Length of the tapered section.
         draw_cpw: If ``False``, the CPW transmission line is not included.
+        with_trails: If ``True``, includes T-rails in the CPW.
+        with_heater: If ``True``, adds a heater for phase tuning in the
+          length of the imbalance section.
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
@@ -1061,10 +1249,11 @@ def mz_modulator_unbalanced(
         rib_core_width_modulator=rib_core_width_modulator,
         modulation_length=modulation_length,
         draw_cpw=False,
+        with_trails=with_trails,
         technology=technology,
     )
 
-    scaling = rf_pad_start_width / central_width
+    scaling = rf_pad_width / central_width
     pad_gap_distance = scaling * (central_width + tl_gap)
     input_s_offset = 0.5 * (pad_gap_distance - splitter_port_distance)
     input_s_bend = s_bend_vert(
@@ -1096,16 +1285,30 @@ def mz_modulator_unbalanced(
     short_straight = _pf.parametric.straight(
         port_spec=port_spec, length=short_length, technology=technology
     )
+
+    bias = _pf.parametric.straight(
+        port_spec=port_spec, length=bias_tuning_section_length, technology=technology
+    )
+    heated = heated_straight_waveguide(
+        port_spec=port_spec,
+        wg_length=bias_tuning_section_length,
+        heater_width=heater_width,
+        heater_offset=heater_offset,
+        pad_size=heater_pad_size,
+        draw_heater=with_heater,
+        technology=technology,
+    )
+
     if length_imbalance > 0:
         top_straight = long_straight
         bot_straight = short_straight
+        top_bias = _pf.Reference(heated, x_reflection=True)
+        bot_bias = _pf.Reference(bias)
     else:
         top_straight = short_straight
         bot_straight = long_straight
-
-    bias_straight = _pf.parametric.straight(
-        port_spec=port_spec, length=bias_tuning_section_length, technology=technology
-    )
+        top_bias = _pf.Reference(bias)
+        bot_bias = _pf.Reference(heated)
 
     c = _pf.Component(name, technology=technology)
     c.properties.__thumbnail__ = "mzm"
@@ -1130,8 +1333,9 @@ def mz_modulator_unbalanced(
     r_top = c.add_reference(bend).connect("P0", r_top["P1"])
     r_top = c.add_reference(top_straight).connect("P0", r_top["P1"])
     r_top = c.add_reference(bend).connect("P1", r_top["P1"])
-    r_top = c.add_reference(bias_straight).connect("P0", r_top["P0"])
-    r_top = c.add_reference(bend).connect("P1", r_top["P1"])
+    c.add(top_bias)
+    top_bias.connect("P0", r_top["P0"])
+    r_top = c.add_reference(bend).connect("P1", top_bias["P1"])
     r_top = c.add_reference(top_straight).connect("P0", r_top["P0"])
 
     # Output side, bottom
@@ -1139,8 +1343,9 @@ def mz_modulator_unbalanced(
     r_bot = c.add_reference(bend).connect("P1", r_bot["P1"])
     r_bot = c.add_reference(bot_straight).connect("P0", r_bot["P0"])
     r_bot = c.add_reference(bend).connect("P0", r_bot["P1"])
-    r_bot = c.add_reference(bias_straight).connect("P0", r_bot["P1"])
-    r_bot = c.add_reference(bend).connect("P0", r_bot["P1"])
+    c.add_reference(bot_bias)
+    bot_bias.connect("P0", r_bot["P1"])
+    r_bot = c.add_reference(bend).connect("P0", bot_bias["P1"])
     r_bot = c.add_reference(bot_straight).connect("P0", r_bot["P1"])
 
     out_bend = l_turn_bend(
@@ -1156,17 +1361,28 @@ def mz_modulator_unbalanced(
     r_output = c.add_reference(splitter).connect(splitter_ports[2][0], r_bot["P0"])
     c.add_port(r_output[splitter_ports[0][0]])
 
+    if with_heater:
+        if length_imbalance > 0:
+            c.add_terminal({"heater_0": top_bias["T0"], "heater_1": top_bias["T1"]})
+        else:
+            c.add_terminal({"heater_0": bot_bias["T0"], "heater_1": bot_bias["T1"]})
+
     if draw_cpw:
         pad = cpw_probe_pad_linear(
             port_spec=tl_port_spec,
-            pad_width=rf_pad_start_width,
+            pad_width=rf_pad_width,
             length_straight=rf_pad_length_straight,
             length_tapered=rf_pad_length_tapered,
             technology=technology,
         )
-        tl = _pf.parametric.straight(
-            port_spec=tl_port_spec, length=modulation_length, technology=technology
-        )
+        if with_trails:
+            tl = _cpw_with_t_rails(
+                port_spec=tl_port_spec, length=modulation_length, technology=technology
+            )
+        else:
+            tl = _pf.parametric.straight(
+                port_spec=tl_port_spec, length=modulation_length, technology=technology
+            )
         tl_ref = c.add_reference(tl)
         pad0 = c.add_reference(pad).connect("E0", tl_ref["E0"])
         pad1 = c.add_reference(pad).mirror().connect("E0", tl_ref["E1"])
@@ -1192,6 +1408,89 @@ def mz_modulator_unbalanced(
     if model is not None:
         c.add_model(model)
 
+    return c
+
+
+@_pf.parametric_component(name_prefix="MZM_HS")
+def mz_modulator_unbalanced_high_speed(
+    *,
+    splitter: _typ.Union[_pf.Component, None] = None,
+    tl_port_spec: _typ.Union[str, _pf.PortSpec] = "UniCPW-HS",
+    taper_length: _pft.PositiveDimension = 100.0,
+    rib_core_width_modulator: _pft.PositiveDimension = 2.5,
+    modulation_length: _pft.PositiveDimension = 7500.0,
+    length_imbalance: _pft.Coordinate = 100.0,
+    bias_tuning_section_length: _pft.PositiveDimension = 700.0,
+    rf_pad_width: _pft.PositiveDimension = 80.0,
+    rf_pad_length_straight: _pft.PositiveDimension = 10.0,
+    rf_pad_length_tapered: _pft.PositiveDimension = 300.0,
+    heater_width: _pft.PositiveDimension = 1.0,
+    heater_offset: _pft.Coordinate = 1.2,
+    heater_pad_size: _pft.PositiveDimension2D = (75.0, 75.0),
+    draw_cpw: bool = True,
+    with_trails: bool = True,
+    with_heater: bool = False,
+    technology: _typ.Union[_pf.Technology, None] = None,
+    name: str = "",
+    model: _pf.Model | None = _pf.CircuitModel(),
+    circuit_model_kwargs: _pft.kwargs_for(_pf.CircuitModel, deprecated=True) | None = None,
+) -> _pf.Component:
+    """Mach-Zehnder modulator based on the Pockels effect.
+
+    The modulator works in a differential push-pull configuration driven by
+    a single GSG line.
+
+    Args:
+        splitter: 1×2 MMI splitter used in the modulator. If not set, the
+          default MMI is used.
+        tl_port_spec: Port specification for the CPW transmission line.
+        taper_length: Length of the tapering section between the modulation
+          and routing waveguides.
+        rib_core_width_modulator: Waveguide core width in the phase
+          modulation section.
+        modulation_length: Length of the phase modulation section.
+        length_imbalance: Length difference between the two arms of the MZI.
+        bias_tuning_section_length: Length of the horizontal section that
+          can be used for phase tuning.
+        rf_pad_width: Width of the central conductor on the pad side.
+        rf_pad_length_straight: Length of the straight section of the taper
+          on the pad side.
+        rf_pad_length_tapered: Length of the tapered section.
+        draw_cpw: If ``False``, the CPW transmission line is not included.
+        with_trails: If ``True``, includes T-rails in the CPW.
+        with_heater: If ``True``, adds a heater for phase tuning in the
+          length of the imbalance section.
+        technology: Component technology. If ``None``, the default
+          technology is used.
+        name: Component name.
+        model: Model to be used with this component.
+
+    Returns:
+        Component with the modulator, ports, and model.
+    """
+    c = mz_modulator_unbalanced(
+        splitter=splitter,
+        tl_port_spec=tl_port_spec,
+        taper_length=taper_length,
+        rib_core_width_modulator=rib_core_width_modulator,
+        modulation_length=modulation_length,
+        length_imbalance=length_imbalance,
+        bias_tuning_section_length=bias_tuning_section_length,
+        rf_pad_width=rf_pad_width,
+        rf_pad_length_straight=rf_pad_length_straight,
+        rf_pad_length_tapered=rf_pad_length_tapered,
+        heater_width=heater_width,
+        heater_offset=heater_offset,
+        heater_pad_size=heater_pad_size,
+        draw_cpw=draw_cpw,
+        with_trails=with_trails,
+        with_heater=with_heater,
+        technology=technology,
+        name=name,
+        model=model,
+        circuit_model_kwargs=circuit_model_kwargs,
+    )
+    c.name = ""
     return c
 
 
@@ -1387,7 +1686,7 @@ def heater_straight(
 
     c.add("HT", _pf.Path((0, 0), heater_width).segment((heater_length, 0)), pad0, pad1)
 
-    c.add_terminal([pad0["T0"], pad1["T1"]])
+    c.add_terminal([pad0["T0"], pad1["T0"]])
 
     return c
 
@@ -1404,7 +1703,7 @@ def heated_straight_waveguide(
     draw_heater: bool = True,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    model: _pf.Model | None = _pf.Tidy3DModel(port_symmetries=[(1,0)]),
+    model: _pf.Model | None = _pf.Tidy3DModel(port_symmetries=[(1, 0)]),
     tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """Straight heated waveguide section.

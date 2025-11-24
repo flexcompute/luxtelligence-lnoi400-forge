@@ -12,15 +12,6 @@ Installation via `pip`:
     pip install luxtelligence-lnoi400-forge
 
 
-### PhotonForge Web UI
-
-1. [Download from
-   PyPI](https://pypi.org/project/luxtelligence-lnoi400-forge/#files) the
-   latest wheel file: `luxtelligence_lnoi400_forge-*-py3-none-any.whl`.
-
-2. In the PhotonForge web interface, upload that file to load the LNOI400 PDK.
-
-
 ## Usage
 
 The simplest way to use the this PDK in PhotonForge is to set its technology as
@@ -56,6 +47,11 @@ More information can be obtained in the documentation for each function:
     help(lxt.place_edge_couplers)
 
 
+Finally, an extrusion demo for the technology can be seen by running:
+
+    lxt.plot_cross_section()
+
+
 ## Warnings
 
 Please note that the 3D structures obtained by extrusion through this module's
@@ -67,6 +63,16 @@ with smooth boundaries.
 
 
 ## Changelog
+
+### 1.4.0 - Unreleased
+
+- Added `eo_phase_shifter_high_speed` and `mz_modulator_unbalanced_high_speed`.
+- Added RF pads to `eo_phase_shifter` and corresponding terminals.
+- Replace and deprecate the use of `*_kwargs` model parameters with model
+  instances.
+- Changed default values in accordance to 1.4.0 PDK release.
+- Fixed missing terminal in straight heater.
+
 
 ### 1.2.4 - 2025-04-18
 
@@ -80,10 +86,12 @@ with smooth boundaries.
 
 ### 1.1.0 - 2024-12-03
 
-- Added arguments `slab_removal_width` and `input_ext` to `double_linear_inverse_taper`.
+- Added arguments `slab_removal_width` and `input_ext` to
+  `double_linear_inverse_taper`.
 - Added arguments `center` and `exclusion_zone_width` to `chip_frame`.
 - Added argument `start_section_width` to `s_bend_vert`.
-- Added parametric components `dir_coupl`, `heater_pad`, `heater_straight`, and `heated_straight_waveguide`.
+- Added parametric components `dir_coupl`, `heater_pad`, `heater_straight`, and
+  `heated_straight_waveguide`.
 - `chip_frame` is centered around the origin by default.
 - Changed `mz_modulator_unbalanced` default length.
 - Removed port symmetries that were only valid for fundamental modes.
