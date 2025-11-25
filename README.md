@@ -4,6 +4,9 @@ This python module implements the [Luxtelligence](https://luxtelligence.ai/)
 LNOI400 PDK as components and technology specification for
 [PhotonForge](https://docs.flexcompute.com/projects/photonforge/)
 
+For LNOI400 design rules, design manual and PDK specifications, please [contact
+Luxtelligence](https://luxtelligence.ai/service-request/).
+
 
 ## Installation
 

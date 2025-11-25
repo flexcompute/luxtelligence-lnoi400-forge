@@ -3,7 +3,7 @@ import xml.etree.ElementTree as et
 import yaml
 
 
-pdk = "/home/lucas/Flexcompute/pdk/Luxtelligence/techfiles"
+pdk = "/home/lucas/Flexcompute/pdk/Luxtelligence/lxt_pdk_ipkiss-1.4.0/lnoi400/techfiles"
 
 
 def hex_to_rgba(color):
@@ -80,6 +80,7 @@ patterns = {
 
 descriptions = {
     (2, 0): "LN etch (ridge)",
+    (2, 1): "LN etch (ridge, periodic features)",
     (3, 0): "LN etch (full)",
     (3, 1): "Slab etch negative",
     (4, 0): "Labels (LN etch)",
@@ -98,7 +99,6 @@ names = {
 tree = et.parse(f"{pdk}/lnoi.lyp")
 root = tree.getroot()
 
-print("    layers = {")
 for prop in root.findall("properties"):
     text = prop.find("source").text
     if text == "*/*":
@@ -123,11 +123,5 @@ for prop in root.findall("properties"):
         name = "SLAB_NEGATIVE"
 
     print(
-        f"""        {name!r}: pf.LayerSpec(
-            layer={layer},
-            description={desc!r},
-            color={color!r},
-            pattern={pattern!r}
-        ),"""
+        f"{name!r}: pf.LayerSpec(layer={layer}, description={desc!r}, color={color!r}),"
     )
-print("    }")

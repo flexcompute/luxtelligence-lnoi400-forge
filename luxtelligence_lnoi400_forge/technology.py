@@ -2,6 +2,30 @@ import tidy3d as td
 import photonforge as pf
 import photonforge.typing as pft
 
+# RMS error: 5.1e-08
+ln_o_fit = td.PoleResidue(
+    frequency_range=(td.C_0 / 2.0, td.C_0 / 0.5),
+    eps_inf=1.834,
+    poles=(
+        ((-28758150.15401611 - 9272218283034106j), (-87088826899.25455 + 1.390184209108208e16j)),
+        ((-2444588756.812169 - 9270364681667586j), (86846467771.13329 + 6374390707738.091j)),
+        ((-4166996607130.011 - 6662941620389938j), (247761142.9987356 + 75457122287.2009j)),
+        ((-53162033355695.1 - 1762364305777755.5j), (-31834.678431910543 + 795369.1205774402j)),
+    ),
+)
+
+# RMS error: 1.5e-12
+ln_e_fit = td.PoleResidue(
+    frequency_range=(td.C_0 / 2.0, td.C_0 / 0.5),
+    eps_inf=2.513,
+    poles=(
+        ((-175372.3922070572 - 8665247807373606j), (-31765987.412040588 + 8665246284870236j)),
+        ((-84975854556.77737 - 8637602153098374j), (31902737.82444976 + 1517143903.4557555j)),
+        ((-6981161765450.6875 - 5575102734114382j), (17062.58498426836 + 304558.89969198254j)),
+        ((-9930099272379.094 - 2213216358451682.8j), (-12.376051830855069 + 2.238441656216347j)),
+    ),
+)
+
 
 @pf.parametric_technology
 def lnoi400(
@@ -23,15 +47,15 @@ def lnoi400(
         "electrical": td.Medium(permittivity=11.7, name="Si"),
     },
     ln: dict[str, pft.Medium] = {
-        "optical": td.material_library["LiNbO3"]["Zelmon1997"](optical_axis=1),
+        "optical": td.AnisotropicMedium(xx=ln_o_fit, yy=ln_e_fit, zz=ln_o_fit),
         "electrical": td.AnisotropicMedium(
-            xx=td.Medium(permittivity=44),
-            yy=td.Medium(permittivity=27.9),
-            zz=td.Medium(permittivity=44),
+            xx=td.Medium(permittivity=38),
+            yy=td.Medium(permittivity=28),
+            zz=td.Medium(permittivity=38),
         ),
     },
     tl_metal: dict[str, pft.Medium] = {
-        "optical": td.material_library["Au"]["JohnsonChristy1972"],
+        "optical": td.material_library["Au"]["Olmon2012evaporated"],
         "electrical": td.LossyMetalMedium(
             conductivity=41,
             frequency_range=[0.1e9, 100e9],
@@ -65,43 +89,49 @@ def lnoi400(
     # Layers
     layers = {
         "LN_RIDGE": pf.LayerSpec(
-            layer=(2, 0), description="LN etch (ridge)", color="#7d57de18", pattern="//"
+            layer=(2, 0), description="LN etch (ridge)", color="#7c40d618", pattern="//"
+        ),
+        "LN_RIDGE_P": pf.LayerSpec(
+            layer=(2, 1),
+            description="LN etch (ridge, periodic features)",
+            color="#45099e18",
+            pattern="//",
         ),
         "LN_SLAB": pf.LayerSpec(
-            layer=(3, 0), description="LN etch (full)", color="#00008018", pattern="\\"
+            layer=(3, 0), description="LN etch (full)", color="#346ebf18", pattern="\\"
         ),
         "SLAB_NEGATIVE": pf.LayerSpec(
-            layer=(3, 1), description="Slab etch negative", color="#6750bf18", pattern="\\"
+            layer=(3, 1), description="Slab etch negative", color="#81aae318", pattern="\\\\"
         ),
         "LABELS": pf.LayerSpec(
-            layer=(4, 0), description="Labels (LN etch)", color="#5179b518", pattern="/"
+            layer=(4, 0), description="Labels (LN etch)", color="#757b8518", pattern="solid"
         ),
         "CHIP_CONTOUR": pf.LayerSpec(
-            layer=(6, 0), description="Usable floorplan area", color="#ffc6b818", pattern="\\"
+            layer=(6, 0), description="Usable floorplan area", color="#6d461318", pattern="hollow"
         ),
         "CHIP_EXCLUSION_ZONE": pf.LayerSpec(
-            layer=(6, 1), description="Final chip boundaries", color="#00fe9c18", pattern="/"
+            layer=(6, 1), description="Final chip boundaries", color="#77964518", pattern="hollow"
         ),
         "TL": pf.LayerSpec(
-            layer=(21, 0), description="Metal transmission lines", color="#eadb0718", pattern="\\"
+            layer=(21, 0), description="Metal transmission lines", color="#ebb73418", pattern="+"
         ),
         "HT": pf.LayerSpec(
-            layer=(21, 1), description="Metal heaters", color="#f0b90518", pattern="."
+            layer=(21, 1), description="Metal heaters", color="#d75c1b18", pattern=":"
         ),
         "ALIGN": pf.LayerSpec(
-            layer=(31, 0), description="Alignment markers (LN etch)", color="#ba29c218", pattern="/"
+            layer=(31, 0), description="Alignment markers (LN etch)", color="#d4467c18", pattern="+"
         ),
         "DOC": pf.LayerSpec(
             layer=(201, 0),
             description="Labels for GDS layout (not fabricated)",
-            color="#80a8ff18",
-            pattern=".",
+            color="#857b7518",
+            pattern="solid",
         ),
     }
 
     # Extrusion specifications
     bounds = pf.MaskSpec()  # Empty mask for all chip bounds
-    full_ln_mask = pf.MaskSpec([(2, 0), (4, 0), (31, 0)], [], "+")
+    full_ln_mask = pf.MaskSpec([(2, 0), (2, 1), (4, 0), (31, 0)], [], "+")
     slab_etch_mask = pf.MaskSpec((3, 1), (3, 0), "-")
     tl_mask = pf.MaskSpec((21, 0))
     ht_mask = pf.MaskSpec((21, 1))
