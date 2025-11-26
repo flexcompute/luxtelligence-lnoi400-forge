@@ -286,7 +286,7 @@ def u_turn_bend(
     euler_fraction: _pft.Fraction = 1.0,
     technology: _typ.Union[_pf.Technology, None] = None,
     name: str = "",
-    model: _pf.Model | None = _pf.Tidy3DModel(),
+    model: _pf.Model | None = _pf.Tidy3DModel(port_symmetries=[(1, 0)]),
     tidy3d_model_kwargs: _pft.kwargs_for(_pf.Tidy3DModel, deprecated=True) | None = None,
 ) -> _pf.Component:
     """180° bend.
@@ -1584,7 +1584,6 @@ def heater_pad(
         technology: Component technology. If ``None``, the default
           technology is used.
         name: Component name.
-        model: Model to be used with this component.
 
     Returns:
         Component with the bonding pad centered at the origin.
