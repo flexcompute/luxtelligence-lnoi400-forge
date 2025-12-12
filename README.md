@@ -67,7 +67,7 @@ with smooth boundaries.
 
 ## Changelog
 
-### 1.4.0 - Unreleased
+### 1.4.0 - 2025-12-12
 
 - Added `eo_phase_shifter_high_speed` and `mz_modulator_unbalanced_high_speed`.
 - Added RF pads to `eo_phase_shifter` and corresponding terminals.
